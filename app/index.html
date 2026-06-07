@@ -111,8 +111,7 @@
 
     <!-- 3) 홈 -->
     <div id="home" class="screen">
-      <div class="flex items-center justify-between text-[14px] text-[var(--muted-2)]">
-        <span>axfesta2026.live</span>
+      <div class="flex items-center justify-end text-[14px] text-[var(--muted-2)]">
         <button id="logoutBtn" class="text-[var(--muted)] underline">로그아웃</button>
       </div>
       <div class="mt-4">
@@ -142,6 +141,12 @@
           <span class="ico" style="background:rgba(139,43,255,.2);">🧠</span>
           <span class="flex-1"><span class="block text-[16px] font-bold">퀴즈 참여</span>
             <span class="block text-[14px] text-[var(--muted)] mt-0.5">발표 내용 퀴즈! 종합 순위로 경품을 노려보세요</span></span>
+          <span class="text-[var(--muted-2)] text-[17px]">→</span>
+        </button>
+        <button class="menu-btn" data-go="myprize">
+          <span class="ico" style="background:rgba(245,180,0,.2);">🎁</span>
+          <span class="flex-1"><span class="block text-[16px] font-bold">내 경품 · 순위</span>
+            <span class="block text-[14px] text-[var(--muted)] mt-0.5">내 종합 순위와 받을 경품을 확인하세요</span></span>
           <span class="text-[var(--muted-2)] text-[17px]">→</span>
         </button>
       </div>
@@ -217,6 +222,7 @@
         <h1 class="mt-10 text-[32px] font-extrabold leading-tight">곧 퀴즈가<br/><span class="gtext">시작됩니다.</span></h1>
         <p id="qwMsg" class="mt-4 text-[16px] text-[var(--muted)] leading-relaxed px-4">관리자가 시작을 누르면 한 문제씩 나타나요.</p>
         <div id="qwInfo" class="mt-5 chip-m">1부 · 대기 중</div>
+        <div id="qwNick" class="mt-3 text-[15px] font-bold" style="color:var(--violet-soft);">🏷️ —</div>
       </div>
       <button id="quizWaitBack" class="v-btn-ghost">← 홈으로</button>
     </div>
@@ -227,7 +233,8 @@
         <span id="qSpeaker" class="font-semibold text-[var(--muted)]">1부 · Q1</span>
         <span id="qCount" class="font-extrabold" style="color:#FF4D8D;">1 / 8</span>
       </div>
-      <h1 id="qQuestion" class="mt-4 text-[20px] font-extrabold leading-snug"></h1>
+      <div id="qNick" class="text-[14px] mt-1 font-bold" style="color:var(--violet-soft);">🏷️ —</div>
+      <h1 id="qQuestion" class="mt-3 text-[20px] font-extrabold leading-snug"></h1>
       <div id="qImageWrap" class="mt-3 rounded-2xl overflow-hidden" style="height:220px; border:1px solid var(--line); display:none;">
         <img id="qImage" style="width:100%; height:100%; object-fit:cover;" alt="" />
       </div>
@@ -245,16 +252,34 @@
              style="background:linear-gradient(135deg,#8B2BFF,#6A3CFF); color:#fff; box-shadow:0 0 40px -6px rgba(139,43,255,.6);">✓</div>
         <h1 id="qrTitle" class="mt-4 text-[28px] font-extrabold gtext">정답!</h1>
         <p id="qrSub" class="text-[14px] text-[var(--muted)] mt-1">빠른 정답 처리됨</p>
+        <p id="qrNick" class="text-[14px] mt-1 font-bold" style="color:var(--violet-soft);">🏷️ —</p>
       </div>
-      <div class="card-accent p-4 mt-6 text-center">
+      <div class="card-accent p-4 mt-5 text-center">
         <div class="text-[14px] tracking-wide font-bold" style="color:var(--violet-soft);">현재 종합 순위 (잠정)</div>
         <div id="qrRank" class="mt-1 text-[30px] font-black gtext">—</div>
         <div id="qrPoints" class="text-[14px] text-[var(--muted)] mt-1">—</div>
       </div>
-      <div class="rounded-xl p-3 mt-3 text-center" style="background:rgba(255,77,77,.1); border:1px solid rgba(255,77,77,.25);">
-        <div class="text-[14px] text-[var(--muted)] leading-relaxed">상품은 모든 문제 종료 후 <b class="text-[var(--ink)]">종합 순위</b>로 결정 · 1인 1개 · 퇴장 시 수령<br/><b style="color:#FFD27A;">설문 완료자</b>만 경품 대상</div>
+      <div class="rounded-xl p-3 mt-3 text-left" style="background:rgba(255,77,77,.1); border:1px solid rgba(255,77,77,.25);">
+        <div class="text-[14px] text-[var(--ink)] leading-relaxed">상품은 모든 문제 종료 후 종합 순위로 결정돼요!<br/>행사 종료 후 퇴장 시 웰컴부스에서 선물 수령이 가능해요!<br/><b style="color:#FFD27A;">단, 설문 완료가 되어야 상품을 받을 수 있어요!</b></div>
       </div>
       <button id="qrNext" class="v-btn mt-auto">다시 대기하기</button>
+    </div>
+
+    <!-- 10) 내 경품 · 순위 -->
+    <div id="myprize" class="screen">
+      <div class="flex items-center justify-between text-[14px] text-[var(--muted-2)]">
+        <span class="font-bold" style="color:var(--violet-soft);">내 경품 · 순위</span>
+        <button id="mpBack" class="text-[var(--muted)] underline">← 홈</button>
+      </div>
+      <div class="mt-4 text-center">
+        <div class="text-[40px]">🎁</div>
+        <h1 class="mt-1 text-[22px] font-extrabold">내 종합 순위</h1>
+        <p id="mpWho" class="text-[14px] text-[var(--muted)] mt-1">—</p>
+      </div>
+      <div id="mpBody" class="mt-5 flex-1 overflow-auto" style="min-height:0;"></div>
+      <div class="rounded-xl p-3 mt-3 text-left" style="background:rgba(255,77,77,.1); border:1px solid rgba(255,77,77,.25);">
+        <div class="text-[14px] text-[var(--ink)] leading-relaxed">상품은 모든 문제 종료 후 종합 순위로 결정돼요!<br/>행사 종료 후 퇴장 시 웰컴부스에서 선물 수령이 가능해요!<br/><b style="color:#FFD27A;">단, 설문 완료가 되어야 상품을 받을 수 있어요!</b></div>
+      </div>
     </div>
 
   </div>
@@ -266,7 +291,7 @@
 <script src="js/supabase.js"></script>
 <script>
 (function(){
-  var screens = ['loading','login','blocked','home','survey','axresult','quizentry','quizwait','quizQ','quizresult'];
+  var screens = ['loading','login','blocked','home','survey','axresult','quizentry','quizwait','quizQ','quizresult','myprize'];
   function show(id){ screens.forEach(function(s){ document.getElementById(s).classList.toggle('on', s===id); }); }
   var el = function(id){ return document.getElementById(id); };
   function lmsg(text, ok){ var e=el('loginMsg'); e.textContent=text; e.style.color = ok?'#6EE7A0':'#FF6B6B'; e.style.display='block'; }
@@ -421,6 +446,7 @@
   function goWaiting(msg){
     el('qwMsg').textContent = msg || '관리자가 시작을 누르면 한 문제씩 나타나요.';
     el('qwInfo').textContent = quiz.part + '부 · 총 ' + PART_TOTAL[quiz.part] + '문제 · 대기 중';
+    el('qwNick').textContent = '🏷️ ' + (quiz.nick || '-');
     show('quizwait'); startPolling();
   }
   function startPolling(){ stopPolling(); pollQuiz(); quiz.pollTimer=setInterval(pollQuiz, POLL); }
@@ -441,6 +467,7 @@
   function renderQuestion(q){
     el('qSpeaker').textContent = quiz.part + '부 · Q' + q.order_no + (q.speaker ? ' · '+q.speaker : '');
     el('qCount').textContent = q.order_no + ' / ' + PART_TOTAL[quiz.part];
+    el('qNick').textContent = '🏷️ ' + (quiz.nick || '-');
     el('qQuestion').textContent = q.question;
     // 이미지 (있을 때만 표시 · 없으면 영역 자체를 숨김)
     if(q.image_url){ el('qImage').src=q.image_url; el('qImageWrap').style.display='block'; }
@@ -489,6 +516,7 @@
     el('qrIcon').style.background = correct ? 'linear-gradient(135deg,#8B2BFF,#6A3CFF)' : 'linear-gradient(135deg,#6E6796,#3a3360)';
     el('qrTitle').textContent = correct ? '정답!' : '정답이 아니에요';
     el('qrSub').textContent = correct ? '빠른 정답 처리됨 · 점수 적립' : '이번 문제는 점수가 없어요';
+    el('qrNick').textContent = '🏷️ ' + (quiz.nick || '-');
     el('qrRank').textContent='집계 중…'; el('qrPoints').textContent='';
     show('quizresult');
     var r=await db.rpc('my_result', { p_email:getEmail(), p_part:quiz.part });
@@ -498,12 +526,46 @@
   }
   function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+  // ───────────── 내 경품 · 순위 ─────────────
+  el('mpBack').addEventListener('click', function(){ show('home'); });
+  async function startMyPrize(){
+    el('mpWho').textContent = profile ? ((profile.name || profile.email.split('@')[0]) + (profile.company ? ' · '+profile.company : '')) : '';
+    el('mpBody').innerHTML = '<div class="text-center text-[14px] text-[var(--muted)]">불러오는 중…</div>';
+    show('myprize');
+    var html='';
+    for(var p=1; p<=2; p++){
+      var r = await db.rpc('my_result', { p_email:getEmail(), p_part:p });
+      var d = r.data && r.data[0];
+      html += prizeCard(p, d);
+    }
+    el('mpBody').innerHTML = html;
+  }
+  function prizeCard(part, d){
+    if(!d){
+      return '<div class="card p-4 mb-3"><div class="text-[15px] font-bold">'+part+'부</div>'
+        +'<div class="text-[14px] text-[var(--muted)] mt-1">아직 참여 기록이 없어요.</div></div>';
+    }
+    var survey = d.survey_done
+      ? '<span style="color:#6EE7A0;">설문 완료 ✓</span>'
+      : '<span style="color:#FF8A8A;">설문 미완료 — 완료해야 수령</span>';
+    var prize = d.prize ? escapeHtml(d.prize) : '아직 미정';
+    return '<div class="card p-4 mb-3">'
+      + '<div class="flex items-center justify-between"><div class="text-[15px] font-bold">'+part+'부</div><div class="text-[14px]">'+survey+'</div></div>'
+      + '<div class="mt-2 flex items-end justify-between">'
+      +   '<div><div class="text-[14px] text-[var(--muted)]">종합 순위</div><div class="text-[28px] font-black gtext">'+d.rank+'위</div></div>'
+      +   '<div class="text-right"><div class="text-[14px] text-[var(--muted)]">누적 점수</div><div class="text-[20px] font-bold">'+d.total_points+'점</div></div>'
+      + '</div>'
+      + '<div class="mt-3 rounded-xl p-3" style="background:var(--surface-2);"><div class="text-[14px] text-[var(--muted)]">예상 경품</div>'
+      +   '<div class="text-[16px] font-extrabold gtext mt-0.5">'+prize+'</div></div></div>';
+  }
+
   // ───────────── 홈 메뉴 ─────────────
   document.querySelectorAll('[data-go]').forEach(function(b){
     b.addEventListener('click', function(){
       var go=b.getAttribute('data-go');
       if(go==='survey'){ startSurvey(); return; }
       if(go==='quiz'){ startQuizFlow(); return; }
+      if(go==='myprize'){ startMyPrize(); return; }
       toast('부스 스탬프 — 화면 제작 중입니다 🚧');
     });
   });

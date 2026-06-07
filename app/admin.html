@@ -101,9 +101,10 @@
     <section id="quiz" class="sec">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-xl font-bold">퀴즈 운영</h2>
-        <div class="flex gap-2">
-          <span class="pill q-part on" data-part="1">1부 (8문항)</span>
-          <span class="pill q-part" data-part="2">2부 (11문항)</span>
+        <div class="flex gap-2 items-center">
+          <span class="pill q-part on" data-part="1">1부</span>
+          <span class="pill q-part" data-part="2">2부</span>
+          <button id="quizAdd" class="btn-go">＋ 새 문항 추가</button>
         </div>
       </div>
       <div class="grid grid-cols-12 gap-5">
@@ -182,19 +183,37 @@
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-xl font-bold">참가자 명단</h2>
         <div class="flex items-center gap-2">
-          <input id="csvFile" type="file" accept=".csv,text/csv" style="display:none" />
-          <button id="csvBtn" class="btn">＋ 구글시트 명단 가져오기 (CSV)</button>
+          <button id="sheetCfgBtn" class="btn-ghost">⚙ 구글시트 설정</button>
+          <button id="sheetSyncBtn" class="btn">⟳ 구글시트 동기화</button>
           <button id="peopleReload" class="btn-ghost">↻ 새로고침</button>
         </div>
       </div>
+
+      <!-- 구글시트 연동 설정 (이 브라우저에 저장) -->
+      <div id="sheetCfg" class="h-card mb-4" style="display:none;">
+        <div class="label mb-2">구글시트 연동 설정 (이 브라우저에만 저장됩니다)</div>
+        <div class="grid grid-cols-3 gap-3">
+          <div><div class="text-[14px] text-[var(--muted)] mb-1">스프레드시트 ID</div>
+            <input id="sheetId" class="inp w-full" placeholder="시트 URL의 /d/ 와 /edit 사이 문자열" /></div>
+          <div><div class="text-[14px] text-[var(--muted)] mb-1">범위(Range)</div>
+            <input id="sheetRange" class="inp w-full" placeholder="예: 시트1!A:E (기본 A:E)" /></div>
+          <div><div class="text-[14px] text-[var(--muted)] mb-1">Google API Key</div>
+            <input id="sheetKey" class="inp w-full" placeholder="AIza..." /></div>
+        </div>
+        <button id="sheetCfgSave" class="btn mt-3">설정 저장</button>
+        <div class="text-[14px] text-[var(--muted)] mt-2 leading-relaxed">
+          준비: ① 구글시트를 <b>"링크가 있는 모든 사용자 — 뷰어"</b>로 공유 ② Google Cloud에서 <b>Sheets API 사용 설정</b> + <b>API 키</b> 생성(가능하면 이 사이트 도메인으로 제한).
+          시트 첫 줄 헤더에 <b>이름·회사명·직책·이메일·핸드폰</b> 이 있으면 순서 무관 자동 인식.
+        </div>
+      </div>
+
       <div class="h-card">
         <table><thead><tr><th>이름</th><th>회사</th><th>직책</th><th>이메일</th><th>핸드폰</th><th>설문</th></tr></thead>
           <tbody id="peopleRows"><tr><td colspan="6" class="text-[var(--muted)]">불러오는 중…</td></tr></tbody>
         </table>
       </div>
       <p class="text-[14px] text-[var(--muted)] mt-3">
-        ※ 구글시트에서 <b>파일 → 다운로드 → CSV</b>로 받은 뒤 위 버튼으로 업로드하면 명단이 갱신됩니다.
-        시트 첫 줄(헤더)에 <b>이름 · 회사명 · 직책 · 이메일 · 핸드폰</b> 이 있으면 자동 인식해요(순서 무관).
+        ※ <b>구글시트 동기화</b> 버튼을 누르면 시트 최신 명단을 API로 읽어 참가자 명단을 갱신합니다.
         이미 있는 이메일은 정보만 갱신되고 설문·참여 기록은 유지됩니다.
       </p>
     </section>
@@ -217,17 +236,15 @@
         </div>
         <div class="text-[14px] text-[var(--muted)] mt-1">JPG·PNG 파일 첨부 · 자동으로 가로 800px로 축소 저장</div>
       </div>
-      <div class="grid grid-cols-1 gap-2">
-        <input id="emO1" class="inp w-full" placeholder="보기 1" />
-        <input id="emO2" class="inp w-full" placeholder="보기 2" />
-        <input id="emO3" class="inp w-full" placeholder="보기 3" />
-        <input id="emO4" class="inp w-full" placeholder="보기 4" />
+      <div><div class="label mb-1">보기 — 왼쪽 ○에 체크한 것이 정답</div>
+        <div class="grid grid-cols-1 gap-2">
+          <label class="flex items-center gap-2"><input type="radio" name="emAns" value="1" style="width:18px;height:18px;"/><span class="font-bold" style="width:18px;">①</span><input id="emO1" class="inp" style="flex:1;" placeholder="보기 1" /></label>
+          <label class="flex items-center gap-2"><input type="radio" name="emAns" value="2" style="width:18px;height:18px;"/><span class="font-bold" style="width:18px;">②</span><input id="emO2" class="inp" style="flex:1;" placeholder="보기 2" /></label>
+          <label class="flex items-center gap-2"><input type="radio" name="emAns" value="3" style="width:18px;height:18px;"/><span class="font-bold" style="width:18px;">③</span><input id="emO3" class="inp" style="flex:1;" placeholder="보기 3" /></label>
+          <label class="flex items-center gap-2"><input type="radio" name="emAns" value="4" style="width:18px;height:18px;"/><span class="font-bold" style="width:18px;">④</span><input id="emO4" class="inp" style="flex:1;" placeholder="보기 4" /></label>
+        </div>
       </div>
-      <div class="flex items-center gap-3">
-        <div><div class="label mb-1">정답</div>
-          <select id="emAns" class="inp"><option value="1">1번</option><option value="2">2번</option><option value="3">3번</option><option value="4">4번</option></select></div>
-        <div><div class="label mb-1">제한시간(초)</div><input id="emTime" type="number" class="inp" style="width:90px" value="30" /></div>
-      </div>
+      <div><div class="label mb-1">제한시간(초)</div><input id="emTime" type="number" class="inp" style="width:90px" value="30" /></div>
     </div>
     <div class="flex gap-2 mt-4">
       <button id="emCancel" class="btn-ghost flex-1">취소</button>
@@ -296,6 +313,7 @@
     document.querySelectorAll('.q-part').forEach(function(x){x.classList.remove('on');}); b.classList.add('on');
     quizPart=parseInt(b.getAttribute('data-part'),10); loadQuizzes();
   });});
+  el('quizAdd').addEventListener('click', function(){ openNew(); });
   var quizCache=[];
   async function loadQuizzes(){
     var r=await rpc('admin_list_quizzes',{p_part:quizPart}); if(r.error){ toast(r.error.message); return; }
@@ -370,14 +388,26 @@
     if(d){ el('emPreview').src=d; el('emPreview').style.display='block'; el('emImgClear').style.display='inline-block'; }
     else { el('emPreview').style.display='none'; el('emImgClear').style.display='none'; }
   }
+  function setAns(n){ var r=document.querySelector('input[name="emAns"][value="'+(n||1)+'"]'); if(r) r.checked=true; }
+  function getAns(){ var r=document.querySelector('input[name="emAns"]:checked'); return r?parseInt(r.value,10):1; }
   function openEdit(id){
     var q=quizCache.filter(function(x){return x.id===id;})[0]; if(!q) return; editId=id;
     el('emTitle').textContent=q.part+'부 · '+q.order_no+'번';
     el('emSpeaker').value=q.speaker||''; el('emQ').value=q.question||'';
     var o=q.options||[]; el('emO1').value=o[0]||''; el('emO2').value=o[1]||''; el('emO3').value=o[2]||''; el('emO4').value=o[3]||'';
-    el('emAns').value=String(q.answer_idx||1); el('emTime').value=q.time_limit||30;
+    setAns(q.answer_idx||1); el('emTime').value=q.time_limit||30;
     emImgData=q.image_url||null; el('emFile').value=''; setPreview(emImgData);
     el('editModal').classList.add('on'); editPart=q.part; editOrder=q.order_no;
+  }
+  function openNew(){
+    var maxOrder = quizCache.reduce(function(m,q){ return Math.max(m, q.order_no); }, 0);
+    editId=null; editPart=quizPart; editOrder=maxOrder+1;
+    el('emTitle').textContent=quizPart+'부 · '+editOrder+'번 (새 문항)';
+    el('emSpeaker').value=''; el('emQ').value='';
+    el('emO1').value=''; el('emO2').value=''; el('emO3').value=''; el('emO4').value='';
+    setAns(1); el('emTime').value=30;
+    emImgData=null; el('emFile').value=''; setPreview(null);
+    el('editModal').classList.add('on');
   }
   el('emFile').addEventListener('change', async function(){
     var f=this.files && this.files[0]; if(!f) return;
@@ -390,7 +420,7 @@
     var opts=[el('emO1').value,el('emO2').value,el('emO3').value,el('emO4').value];
     var btn=this; btn.disabled=true; btn.textContent='저장 중…';
     var r=await rpc('admin_upsert_quiz',{ p_part:editPart, p_order:editOrder, p_speaker:el('emSpeaker').value,
-      p_question:el('emQ').value, p_options:opts, p_answer_idx:parseInt(el('emAns').value,10),
+      p_question:el('emQ').value, p_options:opts, p_answer_idx:getAns(),
       p_time_limit:parseInt(el('emTime').value,10)||30, p_image_url:emImgData||null });
     btn.disabled=false; btn.textContent='저장';
     if(r.error){ toast('저장 오류: '+r.error.message); return; }
@@ -469,21 +499,10 @@
   }
   el('peopleReload').addEventListener('click', loadPeople);
 
-  // ── CSV(구글시트) 명단 가져오기 ──
-  function parseCSV(text){
-    var rows=[], row=[], cur='', inQ=false, i, c;
-    text=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
-    for(i=0;i<text.length;i++){ c=text[i];
-      if(inQ){ if(c==='"'){ if(text[i+1]==='"'){cur+='"';i++;} else inQ=false; } else cur+=c; }
-      else { if(c==='"') inQ=true; else if(c===','){ row.push(cur); cur=''; }
-             else if(c==='\n'){ row.push(cur); rows.push(row); row=[]; cur=''; } else cur+=c; }
-    }
-    if(cur!==''||row.length){ row.push(cur); rows.push(row); }
-    return rows.filter(function(r){ return r.some(function(x){return (x||'').trim()!=='';}); });
-  }
+  // ── 구글시트 API 동기화 ──
   function mapHeaders(hdr){
     var idx={email:-1,name:-1,company:-1,title:-1,phone:-1};
-    hdr.forEach(function(h,i){ var s=(h||'').trim().toLowerCase().replace(/\s/g,'');
+    (hdr||[]).forEach(function(h,i){ var s=(h||'').trim().toLowerCase().replace(/\s/g,'');
       if(idx.email<0 && /(이메일|email|메일|e-mail)/.test(s)) idx.email=i;
       else if(idx.name<0 && /(이름|성명|name)/.test(s)) idx.name=i;
       else if(idx.company<0 && /(회사|소속|기관|company)/.test(s)) idx.company=i;
@@ -492,25 +511,39 @@
     });
     return idx;
   }
-  el('csvBtn').addEventListener('click', function(){ el('csvFile').click(); });
-  el('csvFile').addEventListener('change', async function(){
-    var f=this.files && this.files[0]; if(!f){ return; }
-    var text=await f.text(); this.value='';
-    var rows=parseCSV(text);
-    if(rows.length<2){ toast('데이터가 없어요 (헤더 + 1행 이상 필요)'); return; }
-    var idx=mapHeaders(rows[0]);
-    if(idx.email<0){ toast('이메일 열을 못 찾았어요. 헤더에 "이메일"이 있는지 확인하세요.'); return; }
-    var items=[];
-    for(var r=1;r<rows.length;r++){ var row=rows[r];
-      var g=function(k){ return idx[k]>=0?(row[idx[k]]||'').trim():''; };
-      var email=g('email'); if(!email) continue;
-      items.push({email:email, name:g('name'), company:g('company'), title:g('title'), phone:g('phone')});
-    }
-    if(!items.length){ toast('가져올 행이 없어요'); return; }
-    if(!confirm(items.length+'명을 명단에 추가/갱신할까요?')) return;
-    var rr=await rpc('admin_import_participants', { p_rows: items });
-    if(rr.error){ toast('가져오기 오류: '+rr.error.message); return; }
-    toast(rr.data+'명 동기화 완료'); loadPeople();
+  function sheetCfg(){ try{ return JSON.parse(localStorage.getItem('axsheet')||'{}'); }catch(_){ return {}; } }
+  function loadSheetCfg(){ var c=sheetCfg(); el('sheetId').value=c.id||''; el('sheetRange').value=c.range||'A:E'; el('sheetKey').value=c.key||''; }
+  el('sheetCfgBtn').addEventListener('click', function(){ var b=el('sheetCfg'); b.style.display = b.style.display==='none'?'block':'none'; loadSheetCfg(); });
+  el('sheetCfgSave').addEventListener('click', function(){
+    var c={ id:el('sheetId').value.trim(), range:(el('sheetRange').value.trim()||'A:E'), key:el('sheetKey').value.trim() };
+    try{ localStorage.setItem('axsheet', JSON.stringify(c)); }catch(_){}
+    toast('설정 저장됨'); el('sheetCfg').style.display='none';
+  });
+  el('sheetSyncBtn').addEventListener('click', async function(){
+    var c=sheetCfg();
+    if(!c.id || !c.key){ toast('먼저 [구글시트 설정]에서 시트 ID와 API Key를 저장하세요.'); el('sheetCfg').style.display='block'; loadSheetCfg(); return; }
+    var btn=this; btn.disabled=true; btn.innerHTML='<span class="spin"></span> 동기화 중…';
+    try{
+      var url='https://sheets.googleapis.com/v4/spreadsheets/'+encodeURIComponent(c.id)
+              +'/values/'+encodeURIComponent(c.range||'A:E')+'?key='+encodeURIComponent(c.key);
+      var res=await fetch(url); var j=await res.json();
+      if(j.error){ toast('시트 오류: '+(j.error.message||'')); return; }
+      var values=j.values||[];
+      if(values.length<2){ toast('시트에 데이터가 없어요 (헤더+1행 이상)'); return; }
+      var idx=mapHeaders(values[0]);
+      if(idx.email<0){ toast('헤더에서 "이메일" 열을 못 찾았어요.'); return; }
+      var items=[];
+      for(var r=1;r<values.length;r++){ var row=values[r];
+        var g=function(k){ return idx[k]>=0?((row[idx[k]]||'')+'').trim():''; };
+        var email=g('email'); if(!email) continue;
+        items.push({email:email, name:g('name'), company:g('company'), title:g('title'), phone:g('phone')});
+      }
+      if(!items.length){ toast('가져올 행이 없어요'); return; }
+      var rr=await rpc('admin_import_participants', { p_rows: items });
+      if(rr.error){ toast('저장 오류: '+rr.error.message); return; }
+      toast(rr.data+'명 동기화 완료'); loadPeople();
+    } catch(e){ toast('동기화 실패: '+(e&&e.message||e)); }
+    finally{ btn.disabled=false; btn.textContent='⟳ 구글시트 동기화'; }
   });
 
   // ── 자동 로그인(세션) ──
