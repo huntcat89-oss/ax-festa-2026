@@ -317,10 +317,11 @@
     toastT=setTimeout(function(){ e.classList.remove('on'); }, 2400); }
   var POLL = (window.AX_CONFIG && window.AX_CONFIG.POLL_MS) || 1500;
 
-  var KEY='axEmail';
-  function saveEmail(e){ try{ localStorage.setItem(KEY,e); }catch(_){} }
-  function getEmail(){ try{ return localStorage.getItem(KEY)||''; }catch(_){ return ''; } }
-  function clearEmail(){ try{ localStorage.removeItem(KEY); }catch(_){} }
+  // 이메일은 메모리(_email) 우선 — iframe(특히 iOS Safari)에서 localStorage가 막혀도 세션 동안 동작
+  var KEY='axEmail', _email='';
+  function saveEmail(e){ _email=e; try{ localStorage.setItem(KEY,e); }catch(_){} }
+  function getEmail(){ if(_email) return _email; try{ _email=localStorage.getItem(KEY)||''; }catch(_){ _email=''; } return _email; }
+  function clearEmail(){ _email=''; try{ localStorage.removeItem(KEY); }catch(_){} }
   var profile = null;
 
   // ── HubSpot 폼 제출 (AX 설문 완료 시) ──
