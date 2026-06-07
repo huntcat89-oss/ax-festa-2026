@@ -193,11 +193,8 @@
       <p class="text-[14px] text-[var(--muted)] mt-2">순위판엔 닉네임 + 회사명이 함께 표시돼요 · 2~10자 · 욕설 불가</p>
 
       <div class="mt-5">
-        <div class="text-[14px] font-bold tracking-wide" style="color:var(--violet-soft);">참여 세션</div>
-        <div class="mt-2 grid grid-cols-2 gap-2.5">
-          <button type="button" class="optmini qpart sel" data-part="1">1부 · 8문제</button>
-          <button type="button" class="optmini qpart" data-part="2">2부 · 11문제</button>
-        </div>
+        <div class="text-[14px] font-bold tracking-wide" style="color:var(--violet-soft);">참여 세션 (명단 기준 자동 배정)</div>
+        <div id="qPartLabel" class="mt-2 card p-3 text-[15px] font-bold">— 부</div>
       </div>
 
       <div class="mt-5">
@@ -416,13 +413,11 @@
   var quiz = { part:1, nick:'', answered:{}, currentId:null, pollTimer:null, tickTimer:null };
   var PART_TOTAL = { 1:8, 2:11 };
 
-  document.querySelectorAll('.qpart').forEach(function(b){
-    b.addEventListener('click', function(){
-      document.querySelectorAll('.qpart').forEach(function(x){ x.classList.remove('sel'); });
-      b.classList.add('sel'); quiz.part=parseInt(b.getAttribute('data-part'),10);
-    });
-  });
-  function startQuizFlow(){ el('nickInput').value=quiz.nick||''; el('nickMsg').style.display='none'; show('quizentry'); }
+  function startQuizFlow(){
+    quiz.part = (profile && profile.part) ? profile.part : 1;  // 명단(시트)에서 배정된 부
+    el('qPartLabel').textContent = quiz.part + '부 · 총 ' + PART_TOTAL[quiz.part] + '문제';
+    el('nickInput').value=quiz.nick||''; el('nickMsg').style.display='none'; show('quizentry');
+  }
 
   el('quizEnterBtn').addEventListener('click', async function(){
     var nick=el('nickInput').value.trim(); var m=el('nickMsg');
@@ -532,8 +527,10 @@
     el('mpWho').textContent = profile ? ((profile.name || profile.email.split('@')[0]) + (profile.company ? ' · '+profile.company : '')) : '';
     el('mpBody').innerHTML = '<div class="text-center text-[14px] text-[var(--muted)]">불러오는 중…</div>';
     show('myprize');
+    var parts = (profile && profile.part) ? [profile.part] : [1,2];  // 배정된 부만 (없으면 양쪽)
     var html='';
-    for(var p=1; p<=2; p++){
+    for(var i=0; i<parts.length; i++){
+      var p = parts[i];
       var r = await db.rpc('my_result', { p_email:getEmail(), p_part:p });
       var d = r.data && r.data[0];
       html += prizeCard(p, d);
