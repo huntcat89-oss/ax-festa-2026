@@ -412,12 +412,21 @@
       return '<div class="mb-2"><div class="flex justify-between text-[14px]"><span><b>'+(i+1)+'</b> '+esc(t)+(correct?' <span class="chip chip-green" style="margin-left:4px">정답</span>':'')+'</span><span>'+n+'명 · '+pct+'%</span></div>'
         +'<div class="bar mt-1"><span style="width:'+pct+'%;'+(correct?'background:#16A34A':'background:#9AA3B5')+'"></span></div></div>';
     }).join('');
-    var list=(d.ranks||[]);
-    if(reveal) list=list.filter(function(x){ return x.correct; });
+    var list=(d.ranks||[]); var cr=0;
     var ranks=list.map(function(x,i){
-      var c=i===0?'g':i===1?'s':i===2?'b':'';
-      return '<div class="flex items-center justify-between" style="padding:7px 0;border-bottom:1px solid var(--line)"><span><span class="rank '+c+'">'+(i+1)+'</span> <b>'+esc(x.nickname)+'</b> <span class="text-[14px] text-[var(--muted)]">· '+esc(x.company||'')+'</span></span><span class="text-[14px] text-[var(--muted)]">+'+x.sec+'s</span></div>';
-    }).join('') || '<div class="text-[var(--muted)] text-[14px]">'+(reveal?'정답자가 없습니다.':'아직 제출이 없습니다.')+'</div>';
+      var wrong = reveal && !x.correct;
+      var num = reveal ? (x.correct ? (++cr) : null) : (i+1);   // 공개 시 정답자만 번호, 진행 중엔 제출순서
+      var c = num===1?'g':num===2?'s':num===3?'b':'';
+      var rankSpan = (num!=null)
+        ? '<span class="rank '+c+'">'+num+'</span>'
+        : '<span class="rank" style="background:transparent;color:var(--muted-2);">–</span>';
+      var nameHtml = wrong
+        ? '<span style="text-decoration:line-through; color:var(--muted);">'+esc(x.nickname)+'</span>'
+        : '<b>'+esc(x.nickname)+'</b>';
+      return '<div class="flex items-center justify-between" style="padding:7px 0;border-bottom:1px solid var(--line);'+(wrong?'opacity:.6;':'')+'">'
+        +'<span>'+rankSpan+' '+nameHtml+' <span class="text-[14px] text-[var(--muted)]">· '+esc(x.company||'')+'</span></span>'
+        +'<span class="text-[14px] text-[var(--muted)]">+'+x.sec+'s</span></div>';
+    }).join('') || '<div class="text-[var(--muted)] text-[14px]">아직 제출이 없습니다.</div>';
     var rankTitle = reveal ? '정답 순위 (정답자만 · 속도순)' : '제출 속도순위 (실시간)';
     var ansLine   = reveal ? '<span class="chip chip-green">정답: '+d.answer_idx+'번</span>' : '<span class="chip chip-gray">정답 비공개</span>';
     el('liveBox').innerHTML='<div class="flex items-center justify-between mb-2"><div class="label">응답 분포 · '+total+'명</div>'+ansLine+'</div>'+bars
