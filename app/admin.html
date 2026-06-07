@@ -197,8 +197,8 @@
         </div>
       </div>
       <div class="h-card">
-        <table><thead><tr><th>부</th><th>이름</th><th>회사</th><th>직책</th><th>이메일</th><th>핸드폰</th><th>접속</th><th>설문</th><th>순위</th><th>당첨여부</th><th>당첨상품</th></tr></thead>
-          <tbody id="peopleRows"><tr><td colspan="11" class="text-[var(--muted)]">불러오는 중…</td></tr></tbody>
+        <table><thead><tr><th>부</th><th>이름</th><th>회사</th><th>직책</th><th>이메일</th><th>핸드폰</th><th>접속</th><th>설문</th><th>순위</th><th>점수</th><th>당첨여부</th><th>당첨상품</th></tr></thead>
+          <tbody id="peopleRows"><tr><td colspan="12" class="text-[var(--muted)]">불러오는 중…</td></tr></tbody>
         </table>
       </div>
       <p class="text-[14px] text-[var(--muted)] mt-3">
@@ -512,8 +512,9 @@
         +'<td>'+(p.connected?'<span class="chip chip-green">접속</span>':'<span class="chip chip-gray">미접속</span>')+'</td>'
         +'<td>'+(p.survey_done?'<span class="chip chip-green">완료</span>':'<span class="chip chip-gray">미완료</span>')+'</td>'
         +'<td>'+(p.rank!=null?('<b>'+p.rank+'위</b>'):'-')+'</td>'
+        +'<td>'+(p.total_points!=null?p.total_points:'-')+'</td>'
         +'<td>'+won+'</td><td>'+prizeText+'</td></tr>';
-    }).join('') : '<tr><td colspan="11" class="text-[var(--muted)]">등록된 참가자가 없습니다.</td></tr>';
+    }).join('') : '<tr><td colspan="12" class="text-[var(--muted)]">등록된 참가자가 없습니다.</td></tr>';
   }
   el('peopleReload').addEventListener('click', loadPeople);
 
