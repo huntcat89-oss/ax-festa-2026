@@ -1,0 +1,22 @@
+# OS / 편집기
+.DS_Store
+*.log
+
+# Claude 설정 / 구버전
+.claude/
+preview_v3.html
+
+# ── 공개 저장소에서 제외 (백엔드/문서/내부 메모) ──
+# Supabase 스키마/시드 = DB 구조·설정 (브라우저에 불필요, 비공개 유지)
+supabase/
+# 설치/운영 가이드, 내부 작업 노트
+README-SETUP.md
+SESSION-NOTES.md
+
+# 의존성 (현재는 CDN 사용이라 없음)
+node_modules/
+
+# 로컬 비밀 (혹시 추가될 경우)
+.env
+.env.*
+*.secret

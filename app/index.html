@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>AX Festa 2026</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet" />
+<style>
+  :root{ --violet:#8B2BFF; --violet-soft:#C27AFF; --magenta:#E608FF; --gold:#DAC5A7;
+    --ink:#F3F0FF; --ink-2:#E2DBFF; --muted:#A99FD0; --muted-2:#8079A8;
+    --line:#2C2456; --bg:#0C0826; --surface:#15102E; --surface-2:#1B1540; }
+  html,body{font-family:"Pretendard Variable",Pretendard,system-ui,sans-serif; margin:0;
+    background:#08061a; color:var(--ink); min-height:100vh; font-size:15px; line-height:1.5;}
+  .wrap{min-height:100vh; display:flex; align-items:center; justify-content:center;}
+  /* 최소 글씨 13px 보장 (모바일 가독성) */
+  .phone, .phone *{ }
+  .phone{width:100%; max-width:440px; min-height:100vh; position:relative; background:
+      radial-gradient(110% 40% at 50% -5%, rgba(139,43,255,.28) 0%, rgba(139,43,255,0) 55%), var(--bg);
+    display:flex; flex-direction:column; padding:24px 20px 26px; box-sizing:border-box; font-size:15px;}
+  @media(min-width:460px){ .phone{min-height:820px; height:820px; border-radius:36px; margin:18px;
+    border:9px solid #060410; box-shadow:0 30px 70px -20px rgba(139,43,255,.35); overflow:auto;} }
+  .screen{flex:1; display:none; flex-direction:column; min-height:0;}
+  .screen.on{display:flex;}
+  .v-btn{display:block; width:100%; padding:16px; border-radius:14px; font-weight:700; font-size:17px;
+    text-align:center; background:var(--violet); color:#fff; border:0; cursor:pointer;
+    box-shadow:0 6px 16px -10px rgba(139,43,255,.6);}
+  .v-btn:disabled{opacity:.45; cursor:not-allowed;}
+  .v-btn-ghost{display:block; width:100%; padding:15px 16px; border-radius:14px; font-weight:600; font-size:15px;
+    text-align:center; background:var(--surface-2); color:var(--ink); border:1px solid var(--line); cursor:pointer;}
+  .inp{width:100%; box-sizing:border-box; padding:15px; border-radius:13px; background:rgba(255,255,255,.06);
+    border:1.5px solid var(--violet); color:var(--ink); font-size:16px; outline:none;}
+  .inp::placeholder{color:var(--muted-2);}
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:16px;}
+  .card-accent{background:linear-gradient(135deg, rgba(139,43,255,.22), rgba(27,21,64,.7) 70%);
+    border:1px solid rgba(139,43,255,.4); border-radius:16px;}
+  .chip-m{display:inline-flex; align-items:center; gap:5px; font-size:13px; padding:5px 11px; border-radius:999px;
+    background:#1E1545; color:#D9C5FF; font-weight:700; border:1px solid rgba(139,43,255,.35);}
+  .gtext{background:linear-gradient(135deg,#A43AFF,#C27AFF 45%,#E608FF); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .menu-btn{width:100%; display:flex; align-items:center; gap:12px; padding:15px; border-radius:18px; text-align:left;
+    background:rgba(255,255,255,.04); border:1px solid var(--line); color:var(--ink); cursor:pointer;}
+  .menu-btn:hover{background:rgba(139,43,255,.12);}
+  .ico{width:46px; height:46px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0;}
+  .opt{display:flex; align-items:center; gap:10px; padding:14px 15px; border-radius:13px; background:var(--surface-2);
+    border:1px solid var(--line); font-size:15px; font-weight:500; color:var(--ink); cursor:pointer;}
+  .opt.sel{border-color:var(--violet); box-shadow:0 0 0 1px var(--violet);
+    background:linear-gradient(135deg, rgba(139,43,255,.28), rgba(27,21,64,.6));}
+  .optmini{display:flex; align-items:center; justify-content:center; text-align:center; padding:12px 6px;
+    border-radius:11px; background:var(--surface-2); border:1px solid var(--line); font-size:13px; font-weight:600;
+    color:var(--ink); min-height:54px; line-height:1.25; cursor:pointer;}
+  .optmini.sel{border-color:var(--violet); box-shadow:0 0 0 1px var(--violet);
+    background:linear-gradient(135deg, rgba(139,43,255,.28), rgba(27,21,64,.6));}
+  .bar{height:7px; background:#241D49; border-radius:999px; overflow:hidden;}
+  .bar>span{display:block; height:100%; background:linear-gradient(90deg,#8B2BFF,#E608FF);}
+  .tile{border-radius:18px; padding:14px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:8px; min-height:92px; border:0; cursor:pointer; color:#fff; transition:transform .1s, filter .1s;}
+  .tile:active{transform:scale(.97);} .tile:hover{filter:brightness(1.08);}
+  .tile:disabled{opacity:.55; cursor:not-allowed;}
+  .tnum{width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,.25); display:flex; align-items:center;
+    justify-content:center; font-size:17px; font-weight:900; line-height:1;}
+  .toast{position:fixed; left:50%; bottom:32px; transform:translateX(-50%); background:#1B1540; color:#fff;
+    padding:13px 18px; border-radius:12px; font-size:14px; border:1px solid var(--violet); box-shadow:0 10px 30px -10px #000;
+    opacity:0; transition:opacity .2s; pointer-events:none; z-index:50; max-width:88%; text-align:center;}
+  .toast.on{opacity:1;}
+  .spin{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;display:inline-block;animation:s .7s linear infinite;vertical-align:-3px;}
+  @keyframes s{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="phone">
+
+    <!-- 로딩 -->
+    <div id="loading" class="screen on items-center justify-center text-center">
+      <div class="spin" style="width:30px;height:30px;border-width:3px;"></div>
+      <div class="text-[14px] text-[var(--muted)] mt-4">불러오는 중…</div>
+    </div>
+
+    <!-- 1) 이메일 입력 -->
+    <div id="login" class="screen">
+      <div class="mt-8">
+        <h1 class="text-[30px] font-extrabold leading-none">AX Festa <span style="color:#FF4D8D;">Live</span></h1>
+        <p class="text-[14px] text-[var(--muted)] mt-3">AI가 일하는 시대, 우리의 변화는 지금 시작됩니다.</p>
+      </div>
+      <div class="mt-8">
+        <div class="text-[14px] font-bold mb-2">이메일 <span style="color:#FF4D8D;">*</span>
+          <span class="text-[13px] text-[var(--muted-2)] font-normal ml-1">사전 등록 명단만 참여 가능</span></div>
+        <input id="emailInput" class="inp" type="email" inputmode="email" placeholder="you@company.com" autocomplete="email" />
+        <div id="loginMsg" class="text-[14px] mt-2" style="display:none;"></div>
+        <button id="enterBtn" class="v-btn mt-3">참여하기</button>
+      </div>
+      <div class="mt-auto pt-6 text-center text-[13px] text-[var(--muted-2)] leading-relaxed">
+        등록하신 이메일이 명단에 있으면 바로 입장합니다.<br/>명단에 없는 이메일은 참여가 제한됩니다.
+      </div>
+    </div>
+
+    <!-- 2) 명단에 없음 -->
+    <div id="blocked" class="screen items-center justify-center text-center">
+      <div class="text-[48px]">🚫</div>
+      <h1 class="text-[21px] font-extrabold mt-3">참여 명단에 없는 이메일이에요</h1>
+      <p class="text-[14px] text-[var(--muted)] mt-3 leading-relaxed px-4">
+        사전 등록된 명단의 이메일로만 참여할 수 있어요.<br/>다른 이메일을 쓰시거나 운영 데스크에 문의해주세요.</p>
+      <button id="blockedBack" class="v-btn-ghost mt-6" style="max-width:260px;">다른 이메일로 시도</button>
+    </div>
+
+    <!-- 3) 홈 -->
+    <div id="home" class="screen">
+      <div class="flex items-center justify-between text-[13px] text-[var(--muted-2)]">
+        <span>axfesta2026.live</span>
+        <button id="logoutBtn" class="text-[var(--muted)] underline">로그아웃</button>
+      </div>
+      <div class="mt-4">
+        <h1 class="text-[28px] font-extrabold leading-none">AX Festa <span style="color:#FF4D8D;">Live</span></h1>
+        <div class="mt-3 card p-4">
+          <div class="text-[13px] text-[var(--muted-2)] font-bold tracking-wide">참가자</div>
+          <div id="homeName" class="text-[17px] font-bold mt-0.5">—</div>
+          <div id="homeCompany" class="text-[14px] text-[var(--muted)]">—</div>
+          <div id="homeEmail" class="text-[13px] text-[var(--muted-2)] mt-0.5">—</div>
+        </div>
+      </div>
+
+      <div class="mt-4 flex flex-col gap-2.5">
+        <button class="menu-btn" data-go="survey">
+          <span class="ico" style="background:rgba(99,102,241,.22);">🧭</span>
+          <span class="flex-1"><span class="block text-[16px] font-bold">나의 AX 유형</span>
+            <span id="surveyState" class="block text-[13px] text-[var(--muted)] mt-0.5">설문으로 내 AX 유형을 확인해보세요!</span></span>
+          <span class="text-[var(--muted-2)] text-[17px]">→</span>
+        </button>
+        <button class="menu-btn" data-go="booth">
+          <span class="ico" style="background:rgba(20,184,166,.2);">🎫</span>
+          <span class="flex-1"><span class="block text-[16px] font-bold">부스 스탬프</span>
+            <span class="block text-[13px] text-[var(--muted)] mt-0.5">AX 체험 부스를 방문하고 인증하세요!</span></span>
+          <span class="text-[var(--muted-2)] text-[17px]">→</span>
+        </button>
+        <button class="menu-btn" data-go="quiz">
+          <span class="ico" style="background:rgba(139,43,255,.2);">🧠</span>
+          <span class="flex-1"><span class="block text-[16px] font-bold">퀴즈 참여</span>
+            <span class="block text-[13px] text-[var(--muted)] mt-0.5">발표 내용 퀴즈! 종합 순위로 경품을 노려보세요</span></span>
+          <span class="text-[var(--muted-2)] text-[17px]">→</span>
+        </button>
+      </div>
+
+      <a href="https://flow.team/ko/ax-festa#timetable" target="_blank" rel="noopener"
+         class="menu-btn mt-2.5 justify-center text-[15px] font-bold" style="gap:8px;">
+        🗓️ 타임테이블 확인하기 <span class="text-[var(--muted-2)] text-[14px]">↗</span>
+      </a>
+
+      <div class="mt-auto pt-4 text-center text-[12.5px] text-[var(--muted-2)]">모든 참여 기록은 입력하신 이메일로 구분됩니다.</div>
+    </div>
+
+    <!-- 4) 설문 -->
+    <div id="survey" class="screen">
+      <div class="flex items-center justify-between mt-2">
+        <span class="chip-m" id="svChip">설문 1 / 5</span>
+        <span class="text-[13px] text-[var(--muted-2)]" id="svHint">택 1</span>
+      </div>
+      <div class="bar mt-3"><span id="svBar" style="width:20%"></span></div>
+      <h1 id="svTitle" class="mt-5 text-[20px] font-extrabold leading-snug"></h1>
+      <div id="svOptions" class="mt-4 flex-1 overflow-auto" style="min-height:0;"></div>
+      <button id="svNext" class="v-btn mt-3" disabled>다음</button>
+      <button id="svBack" class="v-btn-ghost mt-2">← 홈으로</button>
+    </div>
+
+    <!-- 5) 설문 결과(AX 유형) -->
+    <div id="axresult" class="screen items-center text-center">
+      <div class="mt-6"><span class="chip-m">YOUR TYPE</span></div>
+      <div id="axLetter" class="mt-5 text-[78px] font-black leading-none gtext">A</div>
+      <h1 id="axName" class="mt-2 text-[22px] font-extrabold">—</h1>
+      <p id="axDesc" class="text-[14px] text-[var(--muted)] mt-3 leading-relaxed px-3">—</p>
+      <div class="card-accent p-4 mt-6 w-full text-left">
+        <div class="text-[13px] tracking-wide font-bold" style="color:var(--violet-soft);">현장 안내</div>
+        <div id="axDesk" class="mt-2 text-[15px] font-bold leading-snug">—</div>
+        <div id="axSub" class="text-[13px] text-[var(--muted)] mt-2">—</div>
+      </div>
+      <button id="axDone" class="v-btn mt-auto">메뉴로 돌아가기 →</button>
+    </div>
+
+    <!-- 6) 퀴즈 입장 (부 선택 + 닉네임) -->
+    <div id="quizentry" class="screen">
+      <div class="mt-6"><span class="chip-m">QUIZ ENTRY</span></div>
+      <h1 class="mt-3 text-[22px] font-extrabold leading-tight">순위판에 표시될<br/><span class="gtext">닉네임을 정해주세요.</span></h1>
+      <p class="text-[13px] text-[var(--muted)] mt-2">순위판엔 닉네임 + 회사명이 함께 표시돼요 · 2~10자 · 욕설 불가</p>
+
+      <div class="mt-5">
+        <div class="text-[13px] font-bold tracking-wide" style="color:var(--violet-soft);">참여 세션</div>
+        <div class="mt-2 grid grid-cols-2 gap-2.5">
+          <button type="button" class="optmini qpart sel" data-part="1">1부 · 8문제</button>
+          <button type="button" class="optmini qpart" data-part="2">2부 · 11문제</button>
+        </div>
+      </div>
+
+      <div class="mt-5">
+        <input id="nickInput" class="inp" type="text" maxlength="10" placeholder="닉네임 입력 (2~10자)" />
+        <div id="nickMsg" class="text-[14px] mt-2" style="display:none;"></div>
+      </div>
+
+      <button id="quizEnterBtn" class="v-btn mt-auto">퀴즈 입장</button>
+      <button id="quizEntryBack" class="v-btn-ghost mt-2">← 홈으로</button>
+    </div>
+
+    <!-- 7) 퀴즈 대기 -->
+    <div id="quizwait" class="screen items-center justify-center text-center">
+      <div class="text-[13px] font-bold tracking-widest" style="color:var(--violet-soft);">QUIZ STAND-BY</div>
+      <div class="mt-6 w-24 h-24 rounded-full flex items-center justify-center"
+           style="background:radial-gradient(circle, rgba(139,43,255,.2), transparent 70%); box-shadow:0 0 40px -6px rgba(139,43,255,.6);">
+        <div class="w-16 h-16 rounded-full border-2 flex items-center justify-center" style="border-color:rgba(139,43,255,.4);">
+          <div class="w-3.5 h-3.5 rounded-full" style="background:#8B2BFF; box-shadow:0 0 16px #8B2BFF;"></div>
+        </div>
+      </div>
+      <h1 class="mt-7 text-[22px] font-extrabold leading-tight">곧 퀴즈가<br/><span class="gtext">시작됩니다.</span></h1>
+      <p id="qwMsg" class="mt-3 text-[14px] text-[var(--muted)] leading-relaxed px-3">관리자가 시작을 누르면 한 문제씩 나타나요.</p>
+      <div id="qwInfo" class="mt-4 chip-m">1부 · 대기 중</div>
+      <button id="quizWaitBack" class="v-btn-ghost mt-auto">← 홈으로</button>
+    </div>
+
+    <!-- 8) 퀴즈 문제 (Kahoot형 2×2) -->
+    <div id="quizQ" class="screen">
+      <div class="flex items-center justify-between text-[13px] mt-1">
+        <span id="qSpeaker" class="font-semibold text-[var(--muted)]">1부 · Q1</span>
+        <span id="qCount" class="font-extrabold" style="color:#FF4D8D;">1 / 8</span>
+        <span id="qTimer" class="font-bold">⏱ 30</span>
+      </div>
+      <div id="qImageWrap" class="mt-3 rounded-2xl overflow-hidden relative flex items-center justify-center"
+           style="height:110px; background:linear-gradient(135deg,#241A52,#15102E); border:1px solid var(--line);">
+        <div id="qImagePlaceholder" class="text-center"><div class="text-[24px]">🖼️</div>
+          <div class="text-[13px] text-[var(--muted-2)] mt-0.5">발표 자료 이미지</div></div>
+        <img id="qImage" style="display:none; width:100%; height:100%; object-fit:cover;" alt="" />
+      </div>
+      <h1 id="qQuestion" class="mt-3 text-[18px] font-extrabold leading-snug"></h1>
+      <div id="qTiles" class="mt-3 grid grid-cols-2 gap-2.5 flex-1 content-stretch" style="min-height:0;"></div>
+      <div class="mt-3 text-center text-[12.5px] text-[var(--muted-2)]">정답자 중 빠른 순서로 점수 · 종합순위 반영</div>
+    </div>
+
+    <!-- 9) 퀴즈 결과 -->
+    <div id="quizresult" class="screen text-center">
+      <div class="mt-7">
+        <div id="qrIcon" class="w-20 h-20 rounded-full mx-auto flex items-center justify-center text-[34px]"
+             style="background:linear-gradient(135deg,#8B2BFF,#6A3CFF); color:#fff; box-shadow:0 0 40px -6px rgba(139,43,255,.6);">✓</div>
+        <h1 id="qrTitle" class="mt-4 text-[28px] font-extrabold gtext">정답!</h1>
+        <p id="qrSub" class="text-[14px] text-[var(--muted)] mt-1">빠른 정답 처리됨</p>
+      </div>
+      <div class="card-accent p-4 mt-6 text-center">
+        <div class="text-[13px] tracking-wide font-bold" style="color:var(--violet-soft);">현재 종합 순위 (잠정)</div>
+        <div id="qrRank" class="mt-1 text-[30px] font-black gtext">—</div>
+        <div id="qrPoints" class="text-[13px] text-[var(--muted)] mt-1">—</div>
+      </div>
+      <div class="rounded-xl p-3 mt-3 text-center" style="background:rgba(255,77,77,.1); border:1px solid rgba(255,77,77,.25);">
+        <div class="text-[13px] text-[var(--muted)] leading-relaxed">상품은 모든 문제 종료 후 <b class="text-[var(--ink)]">종합 순위</b>로 결정 · 1인 1개 · 퇴장 시 수령<br/><b style="color:#FFD27A;">설문 완료자</b>만 경품 대상</div>
+      </div>
+      <button id="qrNext" class="v-btn mt-auto">다음 문제 기다리기</button>
+    </div>
+
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script src="js/supabase.js"></script>
+<script>
+(function(){
+  var screens = ['loading','login','blocked','home','survey','axresult','quizentry','quizwait','quizQ','quizresult'];
+  function show(id){ screens.forEach(function(s){ document.getElementById(s).classList.toggle('on', s===id); }); }
+  var el = function(id){ return document.getElementById(id); };
+  function lmsg(text, ok){ var e=el('loginMsg'); e.textContent=text; e.style.color = ok?'#6EE7A0':'#FF6B6B'; e.style.display='block'; }
+  var toastT;
+  function toast(t){ var e=el('toast'); e.textContent=t; e.classList.add('on'); clearTimeout(toastT);
+    toastT=setTimeout(function(){ e.classList.remove('on'); }, 2400); }
+  var POLL = (window.AX_CONFIG && window.AX_CONFIG.POLL_MS) || 1500;
+
+  var KEY='axEmail';
+  function saveEmail(e){ try{ localStorage.setItem(KEY,e); }catch(_){} }
+  function getEmail(){ try{ return localStorage.getItem(KEY)||''; }catch(_){ return ''; } }
+  function clearEmail(){ try{ localStorage.removeItem(KEY); }catch(_){} }
+  var profile = null;
+
+  async function check(email){
+    var r = await db.rpc('check_access', { p_email: email });
+    if(r.error){ console.error(r.error); toast('오류: '+r.error.message); return undefined; }
+    return (Array.isArray(r.data) ? r.data[0] : r.data) || null;
+  }
+  function fillHome(p){
+    profile = p;
+    el('homeName').textContent    = p.name || p.email.split('@')[0];
+    el('homeCompany').textContent = p.company || '회사명 미등록';
+    el('homeEmail').textContent   = p.email;
+    el('surveyState').textContent = p.survey_done
+      ? '✓ 설문 완료 — 경품 수령 자격 있음' : '아직 미완료 · 경품 받으려면 설문 필요';
+  }
+  async function init(){
+    var saved = getEmail();
+    if(saved){ var p = await check(saved); if(p){ fillHome(p); show('home'); return; } }
+    show('login');
+  }
+  el('enterBtn').addEventListener('click', async function(){
+    var email = el('emailInput').value.trim().toLowerCase();
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ lmsg('올바른 이메일을 입력하세요.'); return; }
+    var btn=this; btn.disabled=true; btn.innerHTML='<span class="spin"></span> 확인 중…';
+    var p = await check(email);
+    btn.disabled=false; btn.textContent='참여하기';
+    if(p === undefined) return;
+    if(!p){ show('blocked'); return; }
+    saveEmail(email); fillHome(p); show('home');
+  });
+  el('emailInput').addEventListener('keydown', function(e){ if(e.key==='Enter') el('enterBtn').click(); });
+  el('blockedBack').addEventListener('click', function(){ clearEmail(); el('emailInput').value=''; show('login'); });
+  el('logoutBtn').addEventListener('click', function(){ stopPolling(); clearEmail(); el('emailInput').value=''; profile=null; show('login'); });
+
+  // ───────────── 설문 ─────────────
+  var SURVEY = [
+    { key:'q1', title:'현재 사내에서 사용 중인<br/>협업·소통 도구는?', multi:false, hint:'택 1', grid:true,
+      options:['그룹웨어','카카오톡','메일','슬랙','노션','잔디','팀즈','구글 워크스페이스','두레이','아사나','네이트온','스윗','지라','컨플루언스','먼데이닷컴','기타'] },
+    { key:'q2', title:'관심 있는<br/>플로우 상품군은?', multi:false, hint:'택 1',
+      options:['플로우+AI','플로우','플로우+위키'] },
+    { key:'q3', title:'선호하는<br/>도입 형태는?', multi:false, hint:'택 1',
+      options:['SaaS 구독형','Ent 구축형'] },
+    { key:'q4', title:'향후 플로우<br/>도입 계획은?', multi:false, hint:'택 1',
+      options:['현재 검토 중','도움이 된다면 긍정적으로 검토 예정','이미 도입해서 이용 중','아직 계획 없음'] },
+    { key:'q5', title:'도입하신다면<br/>주요 사유는?', multi:true, hint:'복수 선택 가능',
+      options:['사내 메신저·커뮤니케이션 통합','프로젝트·업무 관리 고도화','보고·결재 프로세스 디지털화','재택·하이브리드 근무 환경','외부 협업 (고객사·파트너사)','업무 데이터·지식 중앙화','IT 보안·망분리 환경 협업','그룹웨어·ERP 연동','비용 절감 (툴 교체)','기타'] }
+  ];
+  var TYPE = {
+    A:{ name:'의사결정 단계 리더', desc:'조직의 AX 전환을 가까운 시일 내 결정하시는 단계입니다.',
+        desk:'입구 우측 <b class="gtext">바이올렛 데스크</b>에서 "A 타입 브로셔"를 수령하세요.', sub:'AI 도입 ROI · 의사결정 가이드' },
+    B:{ name:'실무 효율 혁신가', desc:'현업의 업무 효율을 AI로 끌어올리는 데 관심이 크신 단계입니다.',
+        desk:'<b class="gtext">바이올렛 데스크</b>에서 "B 타입 브로셔"를 수령하세요.', sub:'워크플로우·AI 활용 사례집' },
+    C:{ name:'탐색·인지 단계', desc:'AX 트렌드를 살펴보며 가능성을 탐색하시는 단계입니다.',
+        desk:'<b class="gtext">바이올렛 데스크</b>에서 "C 타입 브로셔"를 수령하세요.', sub:'플로우 소개·AX 트렌드 리포트' }
+  };
+  function classify(a){
+    var q2=a.q2,q3=a.q3,q4=a.q4,q5=a.q5||[];
+    if(q4==='현재 검토 중'||q4==='이미 도입해서 이용 중') return 'A';
+    if(q3==='Ent 구축형') return 'A';
+    if(q5.indexOf('IT 보안·망분리 환경 협업')>=0||q5.indexOf('그룹웨어·ERP 연동')>=0) return 'A';
+    if(q2==='플로우+AI'||q2==='플로우+위키') return 'B';
+    var bset=['프로젝트·업무 관리 고도화','보고·결재 프로세스 디지털화','업무 데이터·지식 중앙화','재택·하이브리드 근무 환경','외부 협업 (고객사·파트너사)'];
+    if(q5.some(function(v){return bset.indexOf(v)>=0;})) return 'B';
+    return 'C';
+  }
+  var svIdx=0, svAns={};
+  function startSurvey(){ svIdx=0; svAns={}; renderSurvey(); show('survey'); }
+  function renderSurvey(){
+    var q=SURVEY[svIdx];
+    el('svChip').textContent='설문 '+(svIdx+1)+' / '+SURVEY.length;
+    el('svHint').textContent=q.hint;
+    el('svBar').style.width=((svIdx+1)/SURVEY.length*100)+'%';
+    el('svTitle').innerHTML=q.title;
+    var cur=svAns[q.key], box=el('svOptions');
+    box.className='mt-4 flex-1 overflow-auto '+(q.grid?'grid grid-cols-3 gap-1.5':'flex flex-col gap-2');
+    box.innerHTML='';
+    q.options.forEach(function(t){
+      var d=document.createElement('div');
+      var seld=q.multi?(Array.isArray(cur)&&cur.indexOf(t)>=0):(cur===t);
+      d.className=(q.grid?'optmini':'opt')+(seld?' sel':''); d.textContent=t;
+      d.addEventListener('click', function(){
+        if(q.multi){ var arr=Array.isArray(svAns[q.key])?svAns[q.key].slice():[]; var i=arr.indexOf(t); if(i>=0)arr.splice(i,1); else arr.push(t); svAns[q.key]=arr; }
+        else { svAns[q.key]=t; }
+        renderSurvey();
+      });
+      box.appendChild(d);
+    });
+    var has=q.multi?(Array.isArray(cur)&&cur.length>0):!!cur;
+    var nb=el('svNext'); nb.disabled=!has; nb.textContent=(svIdx===SURVEY.length-1)?'결과 보기':'다음';
+  }
+  el('svNext').addEventListener('click', async function(){
+    if(svIdx<SURVEY.length-1){ svIdx++; renderSurvey(); return; }
+    var type=classify(svAns);
+    var btn=this; btn.disabled=true; btn.innerHTML='<span class="spin"></span> 저장 중…';
+    var r=await db.rpc('submit_survey',{p_email:getEmail(),p_answers:svAns,p_ax_type:type});
+    btn.disabled=false; btn.textContent='결과 보기';
+    if(r.error){ toast('저장 오류: '+r.error.message); return; }
+    if(profile) profile.survey_done=true;
+    el('surveyState').textContent='✓ 설문 완료 — 경품 수령 자격 있음';
+    var t=TYPE[type];
+    el('axLetter').textContent=type; el('axName').textContent=t.name; el('axDesc').textContent=t.desc;
+    el('axDesk').innerHTML=t.desk; el('axSub').textContent=t.sub;
+    show('axresult');
+  });
+  el('svBack').addEventListener('click', function(){ show('home'); });
+  el('axDone').addEventListener('click', function(){ show('home'); });
+
+  // ───────────── 퀴즈 ─────────────
+  var TILE_COLORS = ['#E84C7A','#3B82F6','#8B5CF6','#14B8A6'];
+  var quiz = { part:1, nick:'', answered:{}, currentId:null, pollTimer:null, tickTimer:null };
+  var PART_TOTAL = { 1:8, 2:11 };
+
+  document.querySelectorAll('.qpart').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('.qpart').forEach(function(x){ x.classList.remove('sel'); });
+      b.classList.add('sel'); quiz.part=parseInt(b.getAttribute('data-part'),10);
+    });
+  });
+  function startQuizFlow(){ el('nickInput').value=quiz.nick||''; el('nickMsg').style.display='none'; show('quizentry'); }
+
+  el('quizEnterBtn').addEventListener('click', async function(){
+    var nick=el('nickInput').value.trim(); var m=el('nickMsg');
+    if(nick.length<2||nick.length>10){ m.textContent='닉네임은 2~10자로 입력하세요.'; m.style.color='#FF6B6B'; m.style.display='block'; return; }
+    var btn=this; btn.disabled=true; btn.innerHTML='<span class="spin"></span> 입장 중…';
+    var r=await db.rpc('enter_quiz',{p_email:getEmail(), p_part:quiz.part, p_nickname:nick});
+    btn.disabled=false; btn.textContent='퀴즈 입장';
+    if(r.error){
+      var msg = (r.error.message||'').indexOf('banned')>=0 ? '사용할 수 없는 단어가 포함돼 있어요.'
+              : (r.error.message||'').indexOf('bad_length')>=0 ? '닉네임은 2~10자로 입력하세요.'
+              : '입장 오류: '+r.error.message;
+      m.textContent=msg; m.style.color='#FF6B6B'; m.style.display='block'; return;
+    }
+    quiz.nick=nick;
+    goWaiting('관리자가 시작을 누르면 한 문제씩 나타나요.');
+  });
+  el('quizEntryBack').addEventListener('click', function(){ show('home'); });
+  el('quizWaitBack').addEventListener('click', function(){ stopPolling(); show('home'); });
+  el('qrNext').addEventListener('click', function(){ goWaiting('정답을 제출했어요. 다음 문제를 기다리는 중…'); });
+
+  function goWaiting(msg){
+    el('qwMsg').textContent = msg || '관리자가 시작을 누르면 한 문제씩 나타나요.';
+    el('qwInfo').textContent = quiz.part + '부 · 총 ' + PART_TOTAL[quiz.part] + '문제 · 대기 중';
+    show('quizwait'); startPolling();
+  }
+  function startPolling(){ stopPolling(); pollQuiz(); quiz.pollTimer=setInterval(pollQuiz, POLL); }
+  function stopPolling(){ if(quiz.pollTimer){ clearInterval(quiz.pollTimer); quiz.pollTimer=null; } if(quiz.tickTimer){ clearInterval(quiz.tickTimer); quiz.tickTimer=null; } }
+
+  async function pollQuiz(){
+    var onWait=el('quizwait').classList.contains('on');
+    var onQ=el('quizQ').classList.contains('on');
+    if(!onWait && !onQ) return;
+    var r=await db.from('public_live_quiz').select('*').eq('part', quiz.part).limit(1);
+    if(r.error){ return; }
+    var live=r.data && r.data[0];
+    if(!live){ if(onQ){ quiz.currentId=null; goWaiting('문항이 종료됐어요. 다음 문제를 기다리는 중…'); } return; }
+    if(quiz.answered[live.id]){ if(onQ){ quiz.currentId=null; goWaiting('정답을 제출했어요. 다음 문제를 기다리는 중…'); } return; }
+    if(quiz.currentId !== live.id || onWait){ quiz.currentId=live.id; renderQuestion(live); show('quizQ'); }
+  }
+
+  function renderQuestion(q){
+    el('qSpeaker').textContent = quiz.part + '부 · Q' + q.order_no + (q.speaker ? ' · '+q.speaker : '');
+    el('qCount').textContent = q.order_no + ' / ' + PART_TOTAL[quiz.part];
+    el('qQuestion').textContent = q.question;
+    // 이미지
+    if(q.image_url){ el('qImage').src=q.image_url; el('qImage').style.display='block'; el('qImagePlaceholder').style.display='none'; }
+    else { el('qImage').style.display='none'; el('qImagePlaceholder').style.display='block'; }
+    // 타일
+    var tiles=el('qTiles'); tiles.innerHTML='';
+    var opts = q.options || [];
+    opts.forEach(function(text, i){
+      var b=document.createElement('button');
+      b.className='tile'; b.style.background=TILE_COLORS[i%4];
+      b.innerHTML='<span class="tnum">'+(i+1)+'</span><span class="text-[15px] font-bold text-white text-center leading-tight">'+escapeHtml(text)+'</span>';
+      b.addEventListener('click', function(){ answer(i+1); });
+      tiles.appendChild(b);
+    });
+    // 타이머
+    startTick(q);
+  }
+  function startTick(q){
+    if(quiz.tickTimer){ clearInterval(quiz.tickTimer); quiz.tickTimer=null; }
+    var limit = q.time_limit || 30;
+    var start = q.started_at ? new Date(q.started_at).getTime() : Date.now();
+    function upd(){
+      var left = Math.max(0, Math.ceil((start + limit*1000 - Date.now())/1000));
+      el('qTimer').textContent = '⏱ ' + left;
+      if(left<=0){ el('qTimer').textContent='⏱ 마감'; }
+    }
+    upd(); quiz.tickTimer=setInterval(upd, 500);
+  }
+  async function answer(choice){
+    var qid=quiz.currentId; if(!qid) return;
+    var tiles=el('qTiles').querySelectorAll('.tile');
+    tiles.forEach(function(t){ t.disabled=true; });
+    var r=await db.rpc('submit_answer', { p_email:getEmail(), p_quiz_id:qid, p_choice:choice });
+    if(r.error){
+      tiles.forEach(function(t){ t.disabled=false; });
+      var msg=(r.error.message||'').indexOf('not_live')>=0 ? '이미 마감된 문항이에요.' : '제출 오류: '+r.error.message;
+      toast(msg); return;
+    }
+    quiz.answered[qid]=true;
+    var res = r.data && r.data[0]; var correct = res && res.is_correct;
+    showQuizResult(correct);
+  }
+  async function showQuizResult(correct){
+    if(quiz.tickTimer){ clearInterval(quiz.tickTimer); quiz.tickTimer=null; }
+    el('qrIcon').textContent = correct ? '✓' : '✕';
+    el('qrIcon').style.background = correct ? 'linear-gradient(135deg,#8B2BFF,#6A3CFF)' : 'linear-gradient(135deg,#6E6796,#3a3360)';
+    el('qrTitle').textContent = correct ? '정답!' : '아쉬워요';
+    el('qrSub').textContent = correct ? '빠른 정답 처리됨 · 점수 적립' : '이번 문제는 점수가 없어요';
+    el('qrRank').textContent='집계 중…'; el('qrPoints').textContent='';
+    show('quizresult');
+    var r=await db.rpc('my_result', { p_email:getEmail(), p_part:quiz.part });
+    var d = r.data && r.data[0];
+    if(d){ el('qrRank').textContent = d.rank + '위'; el('qrPoints').textContent = '누적 ' + d.total_points + '점 · 정답 ' + d.correct_count + '개'; }
+    else { el('qrRank').textContent='—'; el('qrPoints').textContent='아직 집계 없음'; }
+  }
+  function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  // ───────────── 홈 메뉴 ─────────────
+  document.querySelectorAll('[data-go]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var go=b.getAttribute('data-go');
+      if(go==='survey'){ startSurvey(); return; }
+      if(go==='quiz'){ startQuizFlow(); return; }
+      toast('부스 스탬프 — 화면 제작 중입니다 🚧');
+    });
+  });
+
+  init();
+})();
+</script>
+</body>
+</html>
