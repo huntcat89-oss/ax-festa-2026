@@ -145,12 +145,13 @@
           <span class="pill r-part" data-part="2">2부</span>
         </div>
       </div>
+      <div id="rankBanner" class="mb-3"></div>
       <div class="h-card">
-        <table><thead><tr><th>순위</th><th>닉네임 · 이름 · 회사</th><th>점수</th></tr></thead>
-          <tbody id="rankRows"><tr><td colspan="3" class="text-[var(--muted)]">불러오는 중…</td></tr></tbody>
+        <table><thead><tr><th>순위</th><th>닉네임 · 이름 · 회사</th><th>점수</th><th>당첨경품</th></tr></thead>
+          <tbody id="rankRows"><tr><td colspan="4" class="text-[var(--muted)]">불러오는 중…</td></tr></tbody>
         </table>
       </div>
-      <p class="text-[14px] text-[var(--muted)] mt-3">※ 공개 화면용 — 이름은 가운데를 가립니다(예: 박*교).</p>
+      <p class="text-[14px] text-[var(--muted)] mt-3">※ 공개 화면용 — 이름은 가운데를 가립니다(예: 박*교). 모든 문항 종료 시 당첨경품이 확정 표기됩니다.</p>
     </section>
 
     <!-- 경품 설정 -->
@@ -174,7 +175,7 @@
             <input id="pName" type="text" placeholder="예: 스타벅스 기프티콘 (비우면 구간 비움)" class="inp w-full mt-2" />
             <button id="pApply" class="btn w-full mt-3">구간 일괄 적용</button>
             <div class="mt-4 pt-3" style="border-top:1px solid var(--line)">
-              <div class="label">상품별 수량</div>
+              <div class="label">경품별 수량</div>
               <div id="pBreak" class="mt-2 text-[14px]" style="max-height:200px; overflow:auto;"></div>
             </div>
             <button id="pSave" class="btn-go w-full mt-4" style="padding:11px;">💾 저장 (DB 반영)</button>
@@ -183,7 +184,7 @@
         </div>
         <div class="col-span-8">
           <div class="h-card">
-            <div class="label mb-3">순위별 상품 (빈 칸 = 상품 없음)</div>
+            <div class="label mb-3">순위별 경품 (빈 칸 = 경품 없음)</div>
             <div id="pList" class="grid grid-cols-2 gap-x-5 gap-y-2" style="max-height:560px; overflow:auto;"></div>
           </div>
         </div>
@@ -202,7 +203,7 @@
         </div>
       </div>
       <div class="h-card">
-        <table><thead><tr><th>부</th><th>이름</th><th>회사</th><th>직책</th><th>이메일</th><th>핸드폰</th><th>접속</th><th>설문</th><th>순위</th><th>점수</th><th>당첨여부</th><th>당첨상품</th></tr></thead>
+        <table><thead><tr><th>부</th><th>이름</th><th>회사</th><th>직책</th><th>이메일</th><th>핸드폰</th><th>접속</th><th>설문</th><th>순위</th><th>점수</th><th>당첨여부</th><th>당첨경품</th></tr></thead>
           <tbody id="peopleRows"><tr><td colspan="12" class="text-[var(--muted)]">불러오는 중…</td></tr></tbody>
         </table>
       </div>
@@ -469,12 +470,23 @@
   async function loadRank(){
     var r=await rpc('admin_leaderboard',{p_part:rankPart}); if(r.error){ toast(r.error.message); return; }
     var rows=r.data||[];
+    // 모든 문항 종료 여부(확정) 판단
+    var qz=await rpc('admin_list_quizzes',{p_part:rankPart});
+    var quizzes=(qz.data)||[];
+    var finalized = quizzes.length>0 && quizzes.every(function(q){ return q.status==='closed'; });
+    el('rankBanner').innerHTML = finalized
+      ? '<span class="chip chip-green" style="font-size:15px;padding:9px 16px;">✅ 모든 문항 종료 — 당첨경품 확정</span>'
+      : '<span class="chip chip-gray" style="font-size:15px;padding:9px 16px;">진행 중 — 잠정 순위/경품 (모든 문항 종료 시 확정)</span>';
     el('rankRows').innerHTML = rows.length? rows.map(function(x){
       var c=x.rank===1?'g':x.rank===2?'s':x.rank===3?'b':'';
+      var prizeCell = x.prize
+        ? (finalized ? '<b style="color:#6A3CFF">🎁 '+esc(x.prize)+'</b>' : '<span class="text-[var(--muted)]">'+esc(x.prize)+' (잠정)</span>')
+        : '<span class="text-[var(--muted)]">-</span>';
       return '<tr><td><span class="rank '+c+'">'+x.rank+'</span></td>'
         +'<td><b>'+esc(x.nickname||'-')+'</b> <span class="text-[14px] text-[var(--muted)]">· '+esc(maskName(x.name))+' · '+esc(x.company||'')+'</span></td>'
-        +'<td><b>'+x.total_points+'</b></td></tr>';
-    }).join('') : '<tr><td colspan="3" class="text-[var(--muted)]">아직 응답이 없습니다.</td></tr>';
+        +'<td><b>'+x.total_points+'</b></td>'
+        +'<td>'+prizeCell+'</td></tr>';
+    }).join('') : '<tr><td colspan="4" class="text-[var(--muted)]">아직 응답이 없습니다.</td></tr>';
   }
 
   // ── 경품 설정 ──
@@ -493,7 +505,7 @@
     el('pList').innerHTML = prizes.map(function(v,i){
       var r=i+1; var c=r===1?'g':r===2?'s':r===3?'b':'';
       return '<div class="flex items-center gap-2"><span class="rank '+c+'">'+r+'</span>'
-        +'<input data-rank="'+i+'" value="'+esc(v).replace(/"/g,'&quot;')+'" placeholder="상품 없음" class="inp" style="flex:1;min-width:0;font-size:14px;padding:7px 9px"/></div>';
+        +'<input data-rank="'+i+'" value="'+esc(v).replace(/"/g,'&quot;')+'" placeholder="경품 없음" class="inp" style="flex:1;min-width:0;font-size:14px;padding:7px 9px"/></div>';
     }).join('');
     var set=prizes.filter(function(x){return x&&x.trim();}).length;
     var counts={},order=[];
