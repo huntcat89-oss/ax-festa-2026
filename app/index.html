@@ -324,20 +324,27 @@
   var profile = null;
 
   // ── HubSpot 폼 제출 (AX 설문 완료 시) ──
-  // config.js 의 AX_CONFIG.HUBSPOT 가 설정돼 있을 때만 동작. 실패해도 앱 흐름엔 영향 없음.
+  // 필드 인터널네임은 폼 정의 기준으로 고정. 개인정보/마케팅 자동 YES, 회사인원 빈값.
+  // 설문 답(svAns)은 키가 곧 HubSpot 인터널네임이라 그대로 전송. 복수선택은 ';' 로 연결.
   function hubspotSubmit(p){
     var H = window.AX_CONFIG && window.AX_CONFIG.HUBSPOT;
     if(!H || !H.portalId || !H.formId || String(H.formId).indexOf('YOUR')>=0) return;
-    var f = H.fields || {};
-    var fields = [];
-    var add = function(name, val){ if(name) fields.push({ name:name, value:(val==null?'':String(val)) }); };
-    add(f.email || 'email', p.email);
-    if(f.name)    add(f.name, p.name);
-    if(f.company) add(f.company, p.company);
-    if(f.numemployees) add(f.numemployees, '');                 // 회사인원: 없어도 제출
-    add(f.privacy   || 'inquiry_privacy',        'true');       // 개인정보 동의 = YES
-    add(f.marketing || 'marketing_agree_forms',  'true');       // 마케팅 동의 = YES
-    if(f.ax_type) add(f.ax_type, p.ax_type);
+    var a = p.answers || {};
+    var multi = Array.isArray(a.implementation_objective) ? a.implementation_objective.join(';') : (a.implementation_objective||'');
+    var fields = [
+      { name:'lastname',                 value: p.name || (p.email||'').split('@')[0] || '참가자' },
+      { name:'email',                    value: p.email || '' },
+      { name:'company',                  value: p.company || '' },
+      { name:'numemployees',             value: '' },                                  // 회사인원: 없어도 제출
+      { name:'competitive_product',      value: a.competitive_product || '' },
+      { name:'service_interest_radio',   value: a.service_interest_radio || '' },
+      { name:'service_type_radio',       value: a.service_type_radio || '' },
+      { name:'r_u_plan_flow',            value: a.r_u_plan_flow || '' },
+      { name:'implementation_objective', value: multi },
+      { name:'r_u_consult_flow',         value: a.r_u_consult_flow || '' },
+      { name:'inquiry_privacy',          value: 'true' },                              // 개인정보 동의 = YES
+      { name:'marketing_agree_forms',    value: 'true' }                              // 마케팅 동의 = YES
+    ];
     try{
       fetch('https://api.hsforms.com/submissions/v3/integration/submit/'+H.portalId+'/'+H.formId, {
         method:'POST', headers:{'Content-Type':'application/json'},
@@ -379,17 +386,20 @@
   el('logoutBtn').addEventListener('click', function(){ stopPolling(); clearEmail(); el('emailInput').value=''; profile=null; show('login'); });
 
   // ───────────── 설문 ─────────────
+  // 키 = HubSpot 인터널네임, 값 = HubSpot 옵션값과 동일 (제출 시 그대로 전송)
   var SURVEY = [
-    { key:'q1', title:'현재 사내에서 사용 중인<br/>협업·소통 도구는?', multi:false, hint:'택 1', grid:true,
+    { key:'competitive_product', title:'현재 사내에서 사용 중인<br/>협업·소통 도구는?', multi:false, hint:'택 1', grid:true,
       options:['그룹웨어','카카오톡','메일','슬랙','노션','잔디','팀즈','구글 워크스페이스','두레이','아사나','네이트온','스윗','지라','컨플루언스','먼데이닷컴','기타'] },
-    { key:'q2', title:'관심 있는<br/>플로우 경품군은?', multi:false, hint:'택 1',
+    { key:'service_interest_radio', title:'관심 있는<br/>플로우 상품군은?', multi:false, hint:'택 1',
       options:['플로우+AI','플로우','플로우+위키'] },
-    { key:'q3', title:'선호하는<br/>도입 형태는?', multi:false, hint:'택 1',
-      options:['SaaS 구독형','Ent 구축형'] },
-    { key:'q4', title:'향후 플로우<br/>도입 계획은?', multi:false, hint:'택 1',
+    { key:'service_type_radio', title:'선호하는<br/>도입 형태는?', multi:false, hint:'택 1',
+      options:[{label:'클라우드(SaaS) 도입', value:'클라우드 도입문의'},{label:'구축형(온프레미스) 도입', value:'구축상품 도입문의'}] },
+    { key:'r_u_plan_flow', title:'향후 플로우<br/>도입 계획은?', multi:false, hint:'택 1',
       options:['현재 검토 중','도움이 된다면 긍정적으로 검토 예정','이미 도입해서 이용 중','아직 계획 없음'] },
-    { key:'q5', title:'도입하신다면<br/>주요 사유는?', multi:true, hint:'복수 선택 가능',
-      options:['사내 메신저·커뮤니케이션 통합','프로젝트·업무 관리 고도화','보고·결재 프로세스 디지털화','재택·하이브리드 근무 환경','외부 협업 (고객사·파트너사)','업무 데이터·지식 중앙화','IT 보안·망분리 환경 협업','그룹웨어·ERP 연동','비용 절감 (툴 교체)','기타'] }
+    { key:'implementation_objective', title:'도입하신다면<br/>주요 사유는?', multi:true, hint:'복수 선택 가능',
+      options:['사내 메신저/커뮤니케이션 통합 (카카오톡·라인 등 대체)','프로젝트·업무 관리 고도화','보고·결재 프로세스 디지털화','재택·하이브리드 근무 환경 구축','외부 협업 (고객사·파트너사 포함)','업무 데이터·지식 중앙화','IT 보안·망분리 환경 내 협업','그룹웨어/ERP 연동','비용 절감 (현재 사용 중인 툴 교체)','기타'] },
+    { key:'r_u_consult_flow', title:'플로우 컨설턴트의<br/>1:1 상담이 필요하신가요?', multi:false, hint:'택 1',
+      options:['네, 전문가와 상담 받고 싶어요!','아니요, 괜찮습니다.'] }
   ];
   var TYPE = {
     A:{ name:'의사결정 단계 리더', desc:'조직의 AX 전환을 가까운 시일 내 결정하시는 단계입니다.',
@@ -400,12 +410,12 @@
         desk:'<b class="gtext">바이올렛 데스크</b>에서 "C 타입 브로셔"를 수령하세요.', sub:'플로우 소개·AX 트렌드 리포트' }
   };
   function classify(a){
-    var q2=a.q2,q3=a.q3,q4=a.q4,q5=a.q5||[];
+    var q2=a.service_interest_radio, q3=a.service_type_radio, q4=a.r_u_plan_flow, q5=a.implementation_objective||[];
     if(q4==='현재 검토 중'||q4==='이미 도입해서 이용 중') return 'A';
-    if(q3==='Ent 구축형') return 'A';
-    if(q5.indexOf('IT 보안·망분리 환경 협업')>=0||q5.indexOf('그룹웨어·ERP 연동')>=0) return 'A';
+    if(q3==='구축상품 도입문의') return 'A';
+    if(q5.indexOf('IT 보안·망분리 환경 내 협업')>=0||q5.indexOf('그룹웨어/ERP 연동')>=0) return 'A';
     if(q2==='플로우+AI'||q2==='플로우+위키') return 'B';
-    var bset=['프로젝트·업무 관리 고도화','보고·결재 프로세스 디지털화','업무 데이터·지식 중앙화','재택·하이브리드 근무 환경','외부 협업 (고객사·파트너사)'];
+    var bset=['프로젝트·업무 관리 고도화','보고·결재 프로세스 디지털화','업무 데이터·지식 중앙화','재택·하이브리드 근무 환경 구축','외부 협업 (고객사·파트너사 포함)'];
     if(q5.some(function(v){return bset.indexOf(v)>=0;})) return 'B';
     return 'C';
   }
@@ -420,10 +430,12 @@
     var cur=svAns[q.key], box=el('svOptions');
     box.className='mt-4 flex-1 overflow-auto '+(q.grid?'grid grid-cols-3 gap-1.5':'flex flex-col gap-2');
     box.innerHTML='';
-    q.options.forEach(function(t){
+    q.options.forEach(function(o){
+      var t = (o && typeof o==='object') ? o.value : o;   // 저장/전송 값
+      var lab = (o && typeof o==='object') ? o.label : o; // 표시 라벨
       var d=document.createElement('div');
       var seld=q.multi?(Array.isArray(cur)&&cur.indexOf(t)>=0):(cur===t);
-      d.className=(q.grid?'optmini':'opt')+(seld?' sel':''); d.textContent=t;
+      d.className=(q.grid?'optmini':'opt')+(seld?' sel':''); d.textContent=lab;
       d.addEventListener('click', function(){
         if(q.multi){ var arr=Array.isArray(svAns[q.key])?svAns[q.key].slice():[]; var i=arr.indexOf(t); if(i>=0)arr.splice(i,1); else arr.push(t); svAns[q.key]=arr; }
         else { svAns[q.key]=t; }
