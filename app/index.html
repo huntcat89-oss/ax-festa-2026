@@ -513,19 +513,21 @@
   }
   async function answer(choice){
     var qid=quiz.currentId; if(!qid) return;
+    stopPolling();  // 제출/결과 동안 폴링 정지 → 결과 화면이 대기로 안 튕김
     var tiles=el('qTiles').querySelectorAll('.tile');
     tiles.forEach(function(t){ t.disabled=true; });
     var r=await db.rpc('submit_answer', { p_email:getEmail(), p_quiz_id:qid, p_choice:choice });
     if(r.error){
       tiles.forEach(function(t){ t.disabled=false; });
       var msg=(r.error.message||'').indexOf('not_live')>=0 ? '이미 마감된 문항이에요.' : '제출 오류: '+r.error.message;
-      toast(msg); return;
+      toast(msg); startPolling(); return;
     }
     quiz.answered[qid]=true;
     var res = r.data && r.data[0]; var correct = res && res.is_correct;
     showQuizResult(correct);
   }
   async function showQuizResult(correct){
+    stopPolling();  // 결과 화면 머무는 동안 폴링 정지
     if(quiz.tickTimer){ clearInterval(quiz.tickTimer); quiz.tickTimer=null; }
     el('qrIcon').textContent = correct ? '✓' : '✕';
     el('qrIcon').style.background = correct ? 'linear-gradient(135deg,#8B2BFF,#6A3CFF)' : 'linear-gradient(135deg,#6E6796,#3a3360)';
