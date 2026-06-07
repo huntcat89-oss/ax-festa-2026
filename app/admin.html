@@ -69,16 +69,15 @@
           <div class="text-[17px] font-bold">운영 관리자</div></div>
       </div>
       <div class="flex items-center gap-2">
-        <span class="chip chip-red">● LIVE</span>
         <button id="logout" class="btn-ghost">로그아웃</button>
       </div>
     </div>
     <div class="wrap flex gap-1 pb-3">
       <button class="navtab on" data-tab="dash">대시보드</button>
       <button class="navtab" data-tab="quiz">퀴즈 운영</button>
-      <button class="navtab" data-tab="rank">종합 순위</button>
       <button class="navtab" data-tab="prize">경품 설정</button>
       <button class="navtab" data-tab="people">참가자</button>
+      <button class="navtab" data-tab="rank" style="color:#8B2BFF; font-weight:800;">종합순위(공개)</button>
     </div>
   </header>
 
@@ -87,13 +86,21 @@
     <!-- 대시보드 -->
     <section id="dash" class="sec on">
       <h2 class="text-xl font-bold mb-4">실시간 대시보드</h2>
-      <div class="grid grid-cols-5 gap-4">
+      <div class="grid grid-cols-4 gap-4">
         <div class="h-card"><div class="label">등록 참가자</div><div id="s_part" class="stat mt-1">—</div></div>
         <div class="h-card"><div class="label">설문 완료</div><div id="s_survey" class="stat mt-1">—</div></div>
         <div class="h-card"><div class="label">1부 퀴즈 입장</div><div id="s_e1" class="stat mt-1">—</div></div>
         <div class="h-card"><div class="label">2부 퀴즈 입장</div><div id="s_e2" class="stat mt-1">—</div></div>
-        <div class="h-card"><div class="label">총 답안 수</div><div id="s_ans" class="stat mt-1">—</div></div>
       </div>
+
+      <div class="h-card mt-4">
+        <div class="flex items-center justify-between">
+          <div class="label">나의 AX 유형 분포 (설문 완료자 기준)</div>
+          <span id="typeTotal" class="text-[14px] text-[var(--muted)]">—</span>
+        </div>
+        <div id="typeDist" class="mt-4 space-y-4"></div>
+      </div>
+
       <p class="text-[14px] text-[var(--muted)] mt-4">※ 자동 새로고침(15초). 새로고침 버튼 <button id="dashReload" class="pill">↻ 지금</button></p>
     </section>
 
@@ -127,18 +134,18 @@
     <!-- 종합 순위 -->
     <section id="rank" class="sec">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-xl font-bold">종합 순위 (속도순 누적 점수)</h2>
+        <h2 class="text-xl font-bold">종합순위(공개) — 속도순 누적 점수</h2>
         <div class="flex gap-2">
           <span class="pill r-part on" data-part="1">1부</span>
           <span class="pill r-part" data-part="2">2부</span>
         </div>
       </div>
       <div class="h-card">
-        <table><thead><tr><th>순위</th><th>닉네임 · 회사</th><th>점수</th><th>정답</th><th>설문</th><th>이메일</th></tr></thead>
-          <tbody id="rankRows"><tr><td colspan="6" class="text-[var(--muted)]">불러오는 중…</td></tr></tbody>
+        <table><thead><tr><th>순위</th><th>닉네임 · 이름 · 회사</th><th>점수</th></tr></thead>
+          <tbody id="rankRows"><tr><td colspan="3" class="text-[var(--muted)]">불러오는 중…</td></tr></tbody>
         </table>
       </div>
-      <p class="text-[14px] text-[var(--muted)] mt-3">※ 설문 미완료자는 순위는 유지되며 수령만 보류됩니다.</p>
+      <p class="text-[14px] text-[var(--muted)] mt-3">※ 공개 화면용 — 이름은 가운데를 가립니다(예: 박*교).</p>
     </section>
 
     <!-- 경품 설정 -->
@@ -182,11 +189,16 @@
     <section id="people" class="sec">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-xl font-bold">참가자 명단</h2>
-        <button id="peopleReload" class="btn-ghost">↻ 새로고침</button>
+        <div class="flex gap-2 items-center">
+          <span class="pill pe-part on" data-part="all">전체</span>
+          <span class="pill pe-part" data-part="1">1부</span>
+          <span class="pill pe-part" data-part="2">2부</span>
+          <button id="peopleReload" class="btn-ghost">↻ 새로고침</button>
+        </div>
       </div>
       <div class="h-card">
-        <table><thead><tr><th>이름</th><th>회사</th><th>직책</th><th>이메일</th><th>핸드폰</th><th>접속</th><th>설문</th></tr></thead>
-          <tbody id="peopleRows"><tr><td colspan="7" class="text-[var(--muted)]">불러오는 중…</td></tr></tbody>
+        <table><thead><tr><th>부</th><th>이름</th><th>회사</th><th>직책</th><th>이메일</th><th>핸드폰</th><th>접속</th><th>설문</th><th>순위</th><th>당첨여부</th><th>당첨상품</th></tr></thead>
+          <tbody id="peopleRows"><tr><td colspan="11" class="text-[var(--muted)]">불러오는 중…</td></tr></tbody>
         </table>
       </div>
       <p class="text-[14px] text-[var(--muted)] mt-3">
@@ -274,11 +286,23 @@
 
   // ── 대시보드 ──
   var dashTimer=null;
+  var TYPE_INFO = { A:{n:'의사결정 단계 리더', c:'#8B2BFF'}, B:{n:'실무 효율 혁신가', c:'#1E40AF'}, C:{n:'탐색·인지 단계', c:'#9A5400'} };
   async function loadDash(){
     var r=await rpc('admin_stats'); if(r.error){ toast(r.error.message); return; }
     var d=r.data||{};
     el('s_part').textContent=d.participants||0; el('s_survey').textContent=d.survey_done||0;
-    el('s_e1').textContent=d.entries_p1||0; el('s_e2').textContent=d.entries_p2||0; el('s_ans').textContent=d.answers||0;
+    el('s_e1').textContent=d.entries_p1||0; el('s_e2').textContent=d.entries_p2||0;
+    // 타입 분포
+    var a=d.type_a||0, b=d.type_b||0, c=d.type_c||0, tot=a+b+c;
+    el('typeTotal').textContent = '합계 ' + tot + '명';
+    var vals={A:a,B:b,C:c};
+    el('typeDist').innerHTML = ['A','B','C'].map(function(k){
+      var v=vals[k], pct=tot?Math.round(v/tot*1000)/10:0, info=TYPE_INFO[k];
+      return '<div><div class="flex justify-between text-[14px] mb-1">'
+        +'<span class="font-semibold"><span class="chip" style="background:'+info.c+'22;color:'+info.c+'">'+k+'</span> '+info.n+'</span>'
+        +'<span class="text-[var(--muted)]">'+v+'명 · '+pct+'%</span></div>'
+        +'<div class="bar"><span style="width:'+pct+'%; background:'+info.c+'"></span></div></div>';
+    }).join('');
     if(dashTimer) clearInterval(dashTimer);
     dashTimer=setInterval(function(){ if(el('dash').classList.contains('on')) loadDash(); }, 15000);
   }
@@ -417,17 +441,16 @@
     document.querySelectorAll('.r-part').forEach(function(x){x.classList.remove('on');}); b.classList.add('on');
     rankPart=parseInt(b.getAttribute('data-part'),10); loadRank();
   });});
+  function maskName(n){ n=(n||'').trim(); if(n.length<=1) return n||'-'; if(n.length===2) return n[0]+'*'; return n[0]+'*'.repeat(n.length-2)+n[n.length-1]; }
   async function loadRank(){
     var r=await rpc('admin_leaderboard',{p_part:rankPart}); if(r.error){ toast(r.error.message); return; }
     var rows=r.data||[];
     el('rankRows').innerHTML = rows.length? rows.map(function(x){
       var c=x.rank===1?'g':x.rank===2?'s':x.rank===3?'b':'';
       return '<tr><td><span class="rank '+c+'">'+x.rank+'</span></td>'
-        +'<td><b>'+esc(x.nickname||'-')+'</b> <span class="text-[14px] text-[var(--muted)]">'+esc(x.company||'')+'</span></td>'
-        +'<td><b>'+x.total_points+'</b></td><td>'+x.correct_count+'</td>'
-        +'<td>'+(x.survey_done?'<span class="chip chip-green">완료</span>':'<span class="chip chip-red">미완료</span>')+'</td>'
-        +'<td class="text-[14px] text-[var(--muted)]">'+esc(x.email)+'</td></tr>';
-    }).join('') : '<tr><td colspan="6" class="text-[var(--muted)]">아직 응답이 없습니다.</td></tr>';
+        +'<td><b>'+esc(x.nickname||'-')+'</b> <span class="text-[14px] text-[var(--muted)]">· '+esc(maskName(x.name))+' · '+esc(x.company||'')+'</span></td>'
+        +'<td><b>'+x.total_points+'</b></td></tr>';
+    }).join('') : '<tr><td colspan="3" class="text-[var(--muted)]">아직 응답이 없습니다.</td></tr>';
   }
 
   // ── 경품 설정 ──
@@ -472,15 +495,25 @@
   });
 
   // ── 참가자 ──
+  var peoplePart='all';
+  document.querySelectorAll('.pe-part').forEach(function(b){ b.addEventListener('click', function(){
+    document.querySelectorAll('.pe-part').forEach(function(x){x.classList.remove('on');}); b.classList.add('on');
+    peoplePart=b.getAttribute('data-part'); loadPeople();
+  });});
   async function loadPeople(){
-    var r=await rpc('admin_participants'); if(r.error){ toast(r.error.message); return; }
-    var rows=r.data||[];
+    var r=await rpc('admin_people'); if(r.error){ toast(r.error.message); return; }
+    var rows=(r.data||[]).filter(function(p){ return peoplePart==='all' || String(p.part)===peoplePart; });
     el('peopleRows').innerHTML = rows.length? rows.map(function(p){
-      return '<tr><td><b>'+esc(p.name||'-')+'</b></td><td>'+esc(p.company||'-')+'</td><td>'+esc(p.title||'-')+'</td>'
+      var won = p.prize ? (p.survey_done ? '<span class="chip chip-green">당첨</span>' : '<span class="chip chip-red">보류</span>') : '<span class="chip chip-gray">미당첨</span>';
+      var prizeText = p.prize ? (p.survey_done ? esc(p.prize) : esc(p.prize)+' (보류)') : '-';
+      return '<tr><td>'+(p.part?('<b>'+p.part+'부</b>'):'-')+'</td>'
+        +'<td><b>'+esc(p.name||'-')+'</b></td><td>'+esc(p.company||'-')+'</td><td>'+esc(p.title||'-')+'</td>'
         +'<td class="text-[14px]">'+esc(p.email)+'</td><td>'+esc(p.phone||'-')+'</td>'
         +'<td>'+(p.connected?'<span class="chip chip-green">접속</span>':'<span class="chip chip-gray">미접속</span>')+'</td>'
-        +'<td>'+(p.survey_done?'<span class="chip chip-green">완료</span>':'<span class="chip chip-gray">미완료</span>')+'</td></tr>';
-    }).join('') : '<tr><td colspan="7" class="text-[var(--muted)]">등록된 참가자가 없습니다.</td></tr>';
+        +'<td>'+(p.survey_done?'<span class="chip chip-green">완료</span>':'<span class="chip chip-gray">미완료</span>')+'</td>'
+        +'<td>'+(p.rank!=null?('<b>'+p.rank+'위</b>'):'-')+'</td>'
+        +'<td>'+won+'</td><td>'+prizeText+'</td></tr>';
+    }).join('') : '<tr><td colspan="11" class="text-[var(--muted)]">등록된 참가자가 없습니다.</td></tr>';
   }
   el('peopleReload').addEventListener('click', loadPeople);
 

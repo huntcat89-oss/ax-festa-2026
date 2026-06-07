@@ -190,7 +190,7 @@
     <div id="quizentry" class="screen">
       <div class="mt-6"><span class="chip-m">QUIZ ENTRY</span></div>
       <h1 class="mt-3 text-[22px] font-extrabold leading-tight">순위판에 표시될<br/><span class="gtext">닉네임을 정해주세요.</span></h1>
-      <p class="text-[14px] text-[var(--muted)] mt-2">순위판엔 닉네임 + 회사명이 함께 표시돼요 · 2~10자 · 욕설 불가</p>
+      <p class="text-[14px] text-[var(--muted)] mt-2">순위판엔 닉네임 + 회사명이 함께 표시돼요</p>
 
       <div class="mt-5">
         <div class="text-[14px] font-bold tracking-wide" style="color:var(--violet-soft);">참여 세션 (명단 기준 자동 배정)</div>
@@ -237,7 +237,7 @@
       </div>
       <div id="qTiles" class="mt-4 grid grid-cols-2 gap-3"></div>
       <div class="mt-auto pt-4 text-center">
-        <div id="qTimer" class="font-extrabold leading-none" style="font-size:36px; color:#FF4D8D;">⏱ 30</div>
+        <div id="qTimer" class="font-extrabold leading-none" style="font-size:36px; color:#FFFFFF;">⏱ 30</div>
         <div class="text-[14px] text-[var(--muted-2)] mt-2">정답자 중 빠른 순서로 점수 · 종합순위 반영</div>
       </div>
     </div>
@@ -440,7 +440,7 @@
 
   function goWaiting(msg){
     el('qwMsg').textContent = msg || '관리자가 시작을 누르면 한 문제씩 나타나요.';
-    el('qwInfo').textContent = quiz.part + '부 · 총 ' + PART_TOTAL[quiz.part] + '문제 · 대기 중';
+    el('qwInfo').textContent = quiz.part + '부 · 대기 중';
     el('qwNick').textContent = '🏷️ ' + (quiz.nick || '-');
     show('quizwait'); startPolling();
   }
