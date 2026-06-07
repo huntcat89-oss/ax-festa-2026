@@ -410,13 +410,17 @@
         desk:'<b class="gtext">바이올렛 데스크</b>에서 "C 타입 브로셔"를 수령하세요.', sub:'플로우 소개·AX 트렌드 리포트' }
   };
   function classify(a){
-    var q2=a.service_interest_radio, q3=a.service_type_radio, q4=a.r_u_plan_flow, q5=a.implementation_objective||[];
-    if(q4==='현재 검토 중'||q4==='이미 도입해서 이용 중') return 'A';
-    if(q3==='구축상품 도입문의') return 'A';
-    if(q5.indexOf('IT 보안·망분리 환경 내 협업')>=0||q5.indexOf('그룹웨어/ERP 연동')>=0) return 'A';
-    if(q2==='플로우+AI'||q2==='플로우+위키') return 'B';
-    var bset=['프로젝트·업무 관리 고도화','보고·결재 프로세스 디지털화','업무 데이터·지식 중앙화','재택·하이브리드 근무 환경 구축','외부 협업 (고객사·파트너사 포함)'];
-    if(q5.some(function(v){return bset.indexOf(v)>=0;})) return 'B';
+    var plan=a.r_u_plan_flow, consult=a.r_u_consult_flow,
+        interest=a.service_interest_radio, type=a.service_type_radio;
+    // A: 의사결정 단계 리더 — 적극적 도입 의지
+    if(plan==='현재 검토 중') return 'A';
+    if(consult==='네, 전문가와 상담 받고 싶어요!') return 'A';
+    // B: 실무 효율 혁신가 — 이미 사용 / 긍정 검토 / AI·위키·구축 관심
+    if(plan==='이미 도입해서 이용 중') return 'B';
+    if(plan==='도움이 된다면 긍정적으로 검토 예정') return 'B';
+    if(interest==='플로우+AI' || interest==='플로우+위키') return 'B';
+    if(type==='구축상품 도입문의') return 'B';
+    // C: 탐색·인지 단계 — 그 외 (대개 '아직 계획 없음')
     return 'C';
   }
   var svIdx=0, svAns={};
