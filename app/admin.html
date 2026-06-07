@@ -12,26 +12,26 @@
   html,body{font-family:"Pretendard Variable",Pretendard,system-ui,sans-serif; margin:0; background:var(--page); color:var(--ink); font-size:15px;}
   .wrap{max-width:1920px; margin:0 auto; padding:0 28px;}
   .h-card{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:18px;}
-  .label{font-size:12px; color:var(--muted); font-weight:700; letter-spacing:.04em; text-transform:uppercase;}
+  .label{font-size:14px; color:var(--muted); font-weight:700; letter-spacing:.04em; text-transform:uppercase;}
   .stat{font-size:30px; font-weight:800; letter-spacing:-.02em;}
   .btn{background:var(--violet); color:#fff; font-weight:700; border:0; border-radius:10px; padding:10px 16px; cursor:pointer; font-size:14px;}
   .btn-ghost{background:#fff; color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:10px 16px; cursor:pointer; font-size:14px; font-weight:600;}
-  .btn-red{background:#fff; color:#D33A3A; border:1px solid #F3C2C2; border-radius:10px; padding:8px 14px; cursor:pointer; font-size:13px; font-weight:700;}
-  .btn-go{background:#188038; color:#fff; border:0; border-radius:10px; padding:8px 14px; cursor:pointer; font-size:13px; font-weight:700;}
+  .btn-red{background:#fff; color:#D33A3A; border:1px solid #F3C2C2; border-radius:10px; padding:8px 14px; cursor:pointer; font-size:14px; font-weight:700;}
+  .btn-go{background:#188038; color:#fff; border:0; border-radius:10px; padding:8px 14px; cursor:pointer; font-size:14px; font-weight:700;}
   .inp{border:1px solid var(--line); border-radius:9px; padding:9px 12px; font-size:14px; outline:none; background:#fff; color:var(--ink);}
   .inp:focus{border-color:var(--violet);}
-  .chip{display:inline-flex; align-items:center; gap:5px; font-size:12px; padding:4px 9px; border-radius:999px; background:#EDE3FF; color:#6A3CFF; font-weight:700;}
+  .chip{display:inline-flex; align-items:center; gap:5px; font-size:14px; padding:4px 9px; border-radius:999px; background:#EDE3FF; color:#6A3CFF; font-weight:700;}
   .chip-red{background:#FDECEC; color:#D33A3A;} .chip-green{background:#E6F6EC; color:#137333;} .chip-gray{background:#EEF0F4; color:#5B6478;}
   .bar{height:9px; background:#ECECF5; border-radius:999px; overflow:hidden;}
   .bar>span{display:block; height:100%; background:linear-gradient(90deg,#8B2BFF,#E608FF);}
   table{width:100%; border-collapse:collapse;}
-  th{font-size:12px; text-transform:uppercase; color:var(--muted); text-align:left; padding:10px 10px; border-bottom:1px solid var(--line); font-weight:700;}
+  th{font-size:14px; text-transform:uppercase; color:var(--muted); text-align:left; padding:10px 10px; border-bottom:1px solid var(--line); font-weight:700;}
   td{font-size:14px; padding:11px 10px; border-bottom:1px solid var(--line);}
-  .rank{display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:50%; background:#E5E7EE; color:#3A4255; font-size:12px; font-weight:700;}
+  .rank{display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:50%; background:#E5E7EE; color:#3A4255; font-size:14px; font-weight:700;}
   .rank.g{background:#F5B400;color:#1A1200;} .rank.s{background:#9AA3B5;color:#10121A;} .rank.b{background:#C97A3F;color:#fff;}
   .navtab{padding:10px 16px; border-radius:10px; font-weight:700; font-size:14px; color:var(--muted); cursor:pointer; background:transparent; border:0;}
   .navtab.on{background:#fff; color:var(--ink); box-shadow:0 1px 3px rgba(0,0,0,.08);}
-  .pill{display:inline-flex; align-items:center; font-size:12px; padding:4px 10px; border-radius:999px; border:1px solid var(--line); color:var(--muted); cursor:pointer;}
+  .pill{display:inline-flex; align-items:center; font-size:14px; padding:4px 10px; border-radius:999px; border:1px solid var(--line); color:var(--muted); cursor:pointer;}
   .pill.on{background:var(--violet); color:#fff; border-color:var(--violet);}
   .sec{display:none;} .sec.on{display:block;}
   .spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;display:inline-block;animation:s .7s linear infinite;vertical-align:-2px;}
@@ -49,11 +49,11 @@
   <div class="h-card" style="width:360px;">
     <div class="w-10 h-10 rounded-xl" style="background:linear-gradient(135deg,#8B2BFF,#6A3CFF)"></div>
     <h3 class="text-lg font-bold mt-4">AX Festa 관리자</h3>
-    <p class="text-[13px] text-[var(--muted)] mt-1">운영팀 전용. 비밀번호를 입력하세요.</p>
+    <p class="text-[14px] text-[var(--muted)] mt-1">운영팀 전용. 비밀번호를 입력하세요.</p>
     <div class="mt-5">
       <div class="label mb-2">Password</div>
       <input id="pw" type="password" class="inp w-full" placeholder="비밀번호" />
-      <div id="pwMsg" class="text-[13px] mt-2" style="display:none;color:#D33A3A;"></div>
+      <div id="pwMsg" class="text-[14px] mt-2" style="display:none;color:#D33A3A;"></div>
     </div>
     <button id="loginBtn" class="btn w-full mt-4">로그인</button>
   </div>
@@ -65,7 +65,7 @@
     <div class="wrap flex items-center justify-between" style="padding-top:14px; padding-bottom:14px;">
       <div class="flex items-center gap-3">
         <div class="w-9 h-9 rounded-xl" style="background:linear-gradient(135deg,#8B2BFF,#6A3CFF)"></div>
-        <div><div class="text-[12px] text-[var(--muted)] font-semibold">FLOW · AX FESTA 2026</div>
+        <div><div class="text-[14px] text-[var(--muted)] font-semibold">FLOW · AX FESTA 2026</div>
           <div class="text-[17px] font-bold">운영 관리자</div></div>
       </div>
       <div class="flex items-center gap-2">
@@ -94,7 +94,7 @@
         <div class="h-card"><div class="label">2부 퀴즈 입장</div><div id="s_e2" class="stat mt-1">—</div></div>
         <div class="h-card"><div class="label">총 답안 수</div><div id="s_ans" class="stat mt-1">—</div></div>
       </div>
-      <p class="text-[13px] text-[var(--muted)] mt-4">※ 자동 새로고침(15초). 새로고침 버튼 <button id="dashReload" class="pill">↻ 지금</button></p>
+      <p class="text-[14px] text-[var(--muted)] mt-4">※ 자동 새로고침(15초). 새로고침 버튼 <button id="dashReload" class="pill">↻ 지금</button></p>
     </section>
 
     <!-- 퀴즈 운영 -->
@@ -137,7 +137,7 @@
           <tbody id="rankRows"><tr><td colspan="6" class="text-[var(--muted)]">불러오는 중…</td></tr></tbody>
         </table>
       </div>
-      <p class="text-[13px] text-[var(--muted)] mt-3">※ 설문 미완료자는 순위는 유지되며 수령만 보류됩니다.</p>
+      <p class="text-[14px] text-[var(--muted)] mt-3">※ 설문 미완료자는 순위는 유지되며 수령만 보류됩니다.</p>
     </section>
 
     <!-- 경품 설정 -->
@@ -162,10 +162,10 @@
             <button id="pApply" class="btn w-full mt-3">구간 일괄 적용</button>
             <div class="mt-4 pt-3" style="border-top:1px solid var(--line)">
               <div class="label">상품별 수량</div>
-              <div id="pBreak" class="mt-2 text-[13px]" style="max-height:200px; overflow:auto;"></div>
+              <div id="pBreak" class="mt-2 text-[14px]" style="max-height:200px; overflow:auto;"></div>
             </div>
             <button id="pSave" class="btn-go w-full mt-4" style="padding:11px;">💾 저장 (DB 반영)</button>
-            <div id="pSaveMsg" class="text-[13px] mt-2" style="display:none;"></div>
+            <div id="pSaveMsg" class="text-[14px] mt-2" style="display:none;"></div>
           </div>
         </div>
         <div class="col-span-8">
@@ -188,7 +188,7 @@
           <tbody id="peopleRows"><tr><td colspan="6" class="text-[var(--muted)]">불러오는 중…</td></tr></tbody>
         </table>
       </div>
-      <p class="text-[13px] text-[var(--muted)] mt-3">※ 명단은 구글시트 동기화로 채웁니다(다음 단계). 지금은 DB에 직접 추가된 인원이 표시됩니다.</p>
+      <p class="text-[14px] text-[var(--muted)] mt-3">※ 명단은 구글시트 동기화로 채웁니다(다음 단계). 지금은 DB에 직접 추가된 인원이 표시됩니다.</p>
     </section>
 
   </main>
@@ -201,7 +201,14 @@
     <div class="mt-3 space-y-2">
       <div><div class="label mb-1">발표자</div><input id="emSpeaker" class="inp w-full" /></div>
       <div><div class="label mb-1">질문</div><textarea id="emQ" class="inp w-full" rows="2"></textarea></div>
-      <div><div class="label mb-1">이미지 URL (선택)</div><input id="emImg" class="inp w-full" placeholder="https://..." /></div>
+      <div><div class="label mb-1">문제 이미지 (선택)</div>
+        <input id="emFile" type="file" accept="image/*" class="inp w-full" />
+        <div class="mt-2 flex items-center gap-2">
+          <img id="emPreview" style="display:none; width:96px; height:64px; object-fit:cover; border-radius:8px; border:1px solid var(--line);" />
+          <button id="emImgClear" type="button" class="btn-ghost" style="display:none; padding:7px 11px;">이미지 제거</button>
+        </div>
+        <div class="text-[14px] text-[var(--muted)] mt-1">JPG·PNG 파일 첨부 · 자동으로 가로 800px로 축소 저장</div>
+      </div>
       <div class="grid grid-cols-1 gap-2">
         <input id="emO1" class="inp w-full" placeholder="보기 1" />
         <input id="emO2" class="inp w-full" placeholder="보기 2" />
@@ -294,7 +301,7 @@
         ? '<button class="btn-red" data-stop="'+q.id+'">종료</button>'
         : '<button class="btn-go" data-start="'+q.id+'">시작</button>';
       return '<tr><td><b>'+q.order_no+'</b></td>'
-        +'<td><div class="font-semibold">'+esc(q.speaker||'')+'</div><div class="text-[12px] text-[var(--muted)]">'+esc((q.question||'').slice(0,40))+'</div></td>'
+        +'<td><div class="font-semibold">'+esc(q.speaker||'')+'</div><div class="text-[14px] text-[var(--muted)]">'+esc((q.question||'').slice(0,40))+'</div></td>'
         +'<td>'+q.answer_idx+'번</td><td>'+st+'</td>'
         +'<td class="text-right whitespace-nowrap">'+act+' <button class="btn-ghost" style="padding:7px 10px" data-edit="'+q.id+'">편집</button></td></tr>';
     }).join('');
@@ -324,34 +331,60 @@
     var bars=opts.map(function(t,i){
       var n=parseInt(dist[(i+1)]||0,10); var pct=total?Math.round(n/total*1000)/10:0;
       var correct=(i+1)===d.answer_idx;
-      return '<div class="mb-2"><div class="flex justify-between text-[13px]"><span><b>'+(i+1)+'</b> '+esc(t)+(correct?' <span class="chip chip-green" style="margin-left:4px">정답</span>':'')+'</span><span>'+n+'명 · '+pct+'%</span></div>'
+      return '<div class="mb-2"><div class="flex justify-between text-[14px]"><span><b>'+(i+1)+'</b> '+esc(t)+(correct?' <span class="chip chip-green" style="margin-left:4px">정답</span>':'')+'</span><span>'+n+'명 · '+pct+'%</span></div>'
         +'<div class="bar mt-1"><span style="width:'+pct+'%;'+(correct?'background:#16A34A':'background:#9AA3B5')+'"></span></div></div>';
     }).join('');
     var ranks=(d.ranks||[]).map(function(x,i){
       var c=i===0?'g':i===1?'s':i===2?'b':'';
-      return '<div class="flex items-center justify-between" style="padding:6px 0;border-bottom:1px solid var(--line)"><span><span class="rank '+c+'">'+(i+1)+'</span> '+esc(x.nickname)+' <span class="text-[12px] text-[var(--muted)]">'+esc(x.company||'')+'</span></span><span class="text-[13px] text-[var(--muted)]">+'+x.sec+'s</span></div>';
-    }).join('') || '<div class="text-[var(--muted)] text-[13px]">아직 정답자가 없습니다.</div>';
+      return '<div class="flex items-center justify-between" style="padding:6px 0;border-bottom:1px solid var(--line)"><span><span class="rank '+c+'">'+(i+1)+'</span> '+esc(x.nickname)+' <span class="text-[14px] text-[var(--muted)]">'+esc(x.company||'')+'</span></span><span class="text-[14px] text-[var(--muted)]">+'+x.sec+'s</span></div>';
+    }).join('') || '<div class="text-[var(--muted)] text-[14px]">아직 정답자가 없습니다.</div>';
     el('liveBox').innerHTML='<div class="label mb-1">응답 분포 · '+total+'명</div>'+bars
       +'<div class="label mt-4 mb-1">정답 순위 (속도순)</div>'+ranks;
   }
 
   // ── 문항 편집 ──
-  var editId=null;
+  var editId=null, editPart, editOrder, emImgData=null;
+  // 파일 → 가로 maxW 로 축소한 JPEG data URL 반환
+  function resizeImage(file, maxW, quality){
+    return new Promise(function(resolve, reject){
+      var img=new Image(), url=URL.createObjectURL(file);
+      img.onload=function(){
+        var scale=Math.min(1, maxW/img.width);
+        var w=Math.round(img.width*scale), h=Math.round(img.height*scale);
+        var c=document.createElement('canvas'); c.width=w; c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h); URL.revokeObjectURL(url);
+        resolve(c.toDataURL('image/jpeg', quality));
+      };
+      img.onerror=function(){ URL.revokeObjectURL(url); reject(); }; img.src=url;
+    });
+  }
+  function setPreview(d){
+    if(d){ el('emPreview').src=d; el('emPreview').style.display='block'; el('emImgClear').style.display='inline-block'; }
+    else { el('emPreview').style.display='none'; el('emImgClear').style.display='none'; }
+  }
   function openEdit(id){
     var q=quizCache.filter(function(x){return x.id===id;})[0]; if(!q) return; editId=id;
     el('emTitle').textContent=q.part+'부 · '+q.order_no+'번';
-    el('emSpeaker').value=q.speaker||''; el('emQ').value=q.question||''; el('emImg').value=q.image_url||'';
+    el('emSpeaker').value=q.speaker||''; el('emQ').value=q.question||'';
     var o=q.options||[]; el('emO1').value=o[0]||''; el('emO2').value=o[1]||''; el('emO3').value=o[2]||''; el('emO4').value=o[3]||'';
     el('emAns').value=String(q.answer_idx||1); el('emTime').value=q.time_limit||30;
+    emImgData=q.image_url||null; el('emFile').value=''; setPreview(emImgData);
     el('editModal').classList.add('on'); editPart=q.part; editOrder=q.order_no;
   }
-  var editPart, editOrder;
+  el('emFile').addEventListener('change', async function(){
+    var f=this.files && this.files[0]; if(!f) return;
+    try{ emImgData=await resizeImage(f, 800, 0.72); setPreview(emImgData); }
+    catch(e){ toast('이미지를 불러오지 못했어요'); }
+  });
+  el('emImgClear').addEventListener('click', function(){ emImgData=null; el('emFile').value=''; setPreview(null); });
   el('emCancel').addEventListener('click', function(){ el('editModal').classList.remove('on'); });
   el('emSave').addEventListener('click', async function(){
     var opts=[el('emO1').value,el('emO2').value,el('emO3').value,el('emO4').value];
+    var btn=this; btn.disabled=true; btn.textContent='저장 중…';
     var r=await rpc('admin_upsert_quiz',{ p_part:editPart, p_order:editOrder, p_speaker:el('emSpeaker').value,
       p_question:el('emQ').value, p_options:opts, p_answer_idx:parseInt(el('emAns').value,10),
-      p_time_limit:parseInt(el('emTime').value,10)||30, p_image_url:el('emImg').value||null });
+      p_time_limit:parseInt(el('emTime').value,10)||30, p_image_url:emImgData||null });
+    btn.disabled=false; btn.textContent='저장';
     if(r.error){ toast('저장 오류: '+r.error.message); return; }
     el('editModal').classList.remove('on'); toast('저장했어요.'); loadQuizzes();
   });
@@ -368,10 +401,10 @@
     el('rankRows').innerHTML = rows.length? rows.map(function(x){
       var c=x.rank===1?'g':x.rank===2?'s':x.rank===3?'b':'';
       return '<tr><td><span class="rank '+c+'">'+x.rank+'</span></td>'
-        +'<td><b>'+esc(x.nickname||'-')+'</b> <span class="text-[12px] text-[var(--muted)]">'+esc(x.company||'')+'</span></td>'
+        +'<td><b>'+esc(x.nickname||'-')+'</b> <span class="text-[14px] text-[var(--muted)]">'+esc(x.company||'')+'</span></td>'
         +'<td><b>'+x.total_points+'</b></td><td>'+x.correct_count+'</td>'
         +'<td>'+(x.survey_done?'<span class="chip chip-green">완료</span>':'<span class="chip chip-red">미완료</span>')+'</td>'
-        +'<td class="text-[12px] text-[var(--muted)]">'+esc(x.email)+'</td></tr>';
+        +'<td class="text-[14px] text-[var(--muted)]">'+esc(x.email)+'</td></tr>';
     }).join('') : '<tr><td colspan="6" class="text-[var(--muted)]">아직 응답이 없습니다.</td></tr>';
   }
 
@@ -391,7 +424,7 @@
     el('pList').innerHTML = prizes.map(function(v,i){
       var r=i+1; var c=r===1?'g':r===2?'s':r===3?'b':'';
       return '<div class="flex items-center gap-2"><span class="rank '+c+'">'+r+'</span>'
-        +'<input data-rank="'+i+'" value="'+esc(v).replace(/"/g,'&quot;')+'" placeholder="상품 없음" class="inp" style="flex:1;min-width:0;font-size:13px;padding:7px 9px"/></div>';
+        +'<input data-rank="'+i+'" value="'+esc(v).replace(/"/g,'&quot;')+'" placeholder="상품 없음" class="inp" style="flex:1;min-width:0;font-size:14px;padding:7px 9px"/></div>';
     }).join('');
     var set=prizes.filter(function(x){return x&&x.trim();}).length;
     var counts={},order=[];
@@ -422,7 +455,7 @@
     var rows=r.data||[];
     el('peopleRows').innerHTML = rows.length? rows.map(function(p){
       return '<tr><td><b>'+esc(p.name||'-')+'</b></td><td>'+esc(p.company||'-')+'</td><td>'+esc(p.title||'-')+'</td>'
-        +'<td class="text-[13px]">'+esc(p.email)+'</td><td>'+esc(p.phone||'-')+'</td>'
+        +'<td class="text-[14px]">'+esc(p.email)+'</td><td>'+esc(p.phone||'-')+'</td>'
         +'<td>'+(p.survey_done?'<span class="chip chip-green">완료</span>':'<span class="chip chip-gray">미완료</span>')+'</td></tr>';
     }).join('') : '<tr><td colspan="6" class="text-[var(--muted)]">등록된 참가자가 없습니다.</td></tr>';
   }
