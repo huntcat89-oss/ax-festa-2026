@@ -215,7 +215,7 @@
 
     <!-- 8) 퀴즈 문제 (Kahoot형 2×2) -->
     <div id="quizQ" class="screen">
-      <div class="flex items-center justify-between text-[13px] mt-1">
+      <div class="flex items-center justify-between text-[14px] mt-1">
         <span id="qSpeaker" class="font-semibold text-[var(--muted)]">1부 · Q1</span>
         <span id="qCount" class="font-extrabold" style="color:#FF4D8D;">1 / 8</span>
         <span id="qTimer" class="font-bold">⏱ 30</span>
@@ -223,12 +223,12 @@
       <div id="qImageWrap" class="mt-3 rounded-2xl overflow-hidden relative flex items-center justify-center"
            style="height:110px; background:linear-gradient(135deg,#241A52,#15102E); border:1px solid var(--line);">
         <div id="qImagePlaceholder" class="text-center"><div class="text-[24px]">🖼️</div>
-          <div class="text-[13px] text-[var(--muted-2)] mt-0.5">발표 자료 이미지</div></div>
+          <div class="text-[14px] text-[var(--muted-2)] mt-0.5">발표 자료 이미지</div></div>
         <img id="qImage" style="display:none; width:100%; height:100%; object-fit:cover;" alt="" />
       </div>
       <h1 id="qQuestion" class="mt-3 text-[18px] font-extrabold leading-snug"></h1>
       <div id="qTiles" class="mt-3 grid grid-cols-2 gap-2.5 flex-1 content-stretch" style="min-height:0;"></div>
-      <div class="mt-3 text-center text-[12.5px] text-[var(--muted-2)]">정답자 중 빠른 순서로 점수 · 종합순위 반영</div>
+      <div class="mt-3 text-center text-[14px] text-[var(--muted-2)]">정답자 중 빠른 순서로 점수 · 종합순위 반영</div>
     </div>
 
     <!-- 9) 퀴즈 결과 -->
@@ -240,12 +240,12 @@
         <p id="qrSub" class="text-[14px] text-[var(--muted)] mt-1">빠른 정답 처리됨</p>
       </div>
       <div class="card-accent p-4 mt-6 text-center">
-        <div class="text-[13px] tracking-wide font-bold" style="color:var(--violet-soft);">현재 종합 순위 (잠정)</div>
+        <div class="text-[14px] tracking-wide font-bold" style="color:var(--violet-soft);">현재 종합 순위 (잠정)</div>
         <div id="qrRank" class="mt-1 text-[30px] font-black gtext">—</div>
-        <div id="qrPoints" class="text-[13px] text-[var(--muted)] mt-1">—</div>
+        <div id="qrPoints" class="text-[14px] text-[var(--muted)] mt-1">—</div>
       </div>
       <div class="rounded-xl p-3 mt-3 text-center" style="background:rgba(255,77,77,.1); border:1px solid rgba(255,77,77,.25);">
-        <div class="text-[13px] text-[var(--muted)] leading-relaxed">상품은 모든 문제 종료 후 <b class="text-[var(--ink)]">종합 순위</b>로 결정 · 1인 1개 · 퇴장 시 수령<br/><b style="color:#FFD27A;">설문 완료자</b>만 경품 대상</div>
+        <div class="text-[14px] text-[var(--muted)] leading-relaxed">상품은 모든 문제 종료 후 <b class="text-[var(--ink)]">종합 순위</b>로 결정 · 1인 1개 · 퇴장 시 수령<br/><b style="color:#FFD27A;">설문 완료자</b>만 경품 대상</div>
       </div>
       <button id="qrNext" class="v-btn mt-auto">다음 문제 기다리기</button>
     </div>
@@ -474,13 +474,19 @@
     }
     quiz.answered[qid]=true;
     var res = r.data && r.data[0]; var correct = res && res.is_correct;
-    showQuizResult(correct);
+    if(correct){
+      // 정답 → 바로 대기 화면으로 (다음 문제 기다리기 누른 것처럼)
+      toast('정답! 🎉 점수가 적립됐어요');
+      goWaiting('정답을 제출했어요. 다음 문제를 기다리는 중…');
+      return;
+    }
+    showQuizResult(false);
   }
   async function showQuizResult(correct){
     if(quiz.tickTimer){ clearInterval(quiz.tickTimer); quiz.tickTimer=null; }
     el('qrIcon').textContent = correct ? '✓' : '✕';
     el('qrIcon').style.background = correct ? 'linear-gradient(135deg,#8B2BFF,#6A3CFF)' : 'linear-gradient(135deg,#6E6796,#3a3360)';
-    el('qrTitle').textContent = correct ? '정답!' : '아쉬워요';
+    el('qrTitle').textContent = correct ? '정답!' : '정답이 아니에요';
     el('qrSub').textContent = correct ? '빠른 정답 처리됨 · 점수 적립' : '이번 문제는 점수가 없어요';
     el('qrRank').textContent='집계 중…'; el('qrPoints').textContent='';
     show('quizresult');
