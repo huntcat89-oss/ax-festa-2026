@@ -91,9 +91,10 @@
     <!-- 대시보드 -->
     <section id="dash" class="sec on">
       <h2 class="text-xl font-bold mb-4">실시간 대시보드</h2>
-      <div class="grid grid-cols-4 gap-4">
+      <div class="grid grid-cols-5 gap-4">
         <div class="h-card"><div class="label">등록 참가자</div><div id="s_part" class="stat mt-1">—</div></div>
         <div class="h-card"><div class="label">설문 완료</div><div id="s_survey" class="stat mt-1">—</div></div>
+        <div class="h-card"><div class="label">부스 인증</div><div id="s_booth" class="stat mt-1">—</div></div>
         <div class="h-card"><div class="label">1부 퀴즈 입장</div><div id="s_e1" class="stat mt-1">—</div></div>
         <div class="h-card"><div class="label">2부 퀴즈 입장</div><div id="s_e2" class="stat mt-1">—</div></div>
       </div>
@@ -107,10 +108,7 @@
           <div id="typeDist" class="mt-4 space-y-4"></div>
         </div>
         <div class="h-card">
-          <div class="flex items-center justify-between">
-            <div class="label">부스 스탬프</div>
-            <span id="boothCount" class="text-[14px] text-[var(--muted)]">—</span>
-          </div>
+          <div class="label">부스 스탬프 설정</div>
           <div class="mt-4 flex items-end gap-3">
             <div><div class="text-[14px] text-[var(--muted)] mb-1">부스 PIN</div><input id="adminBoothPin" class="inp" style="width:130px" placeholder="예: 2026" /></div>
             <div class="flex-1"><div class="text-[14px] text-[var(--muted)] mb-1">부스 이름</div><input id="adminBoothTitle" class="inp w-full" placeholder="AX 체험 부스" /></div>
@@ -217,8 +215,8 @@
         </div>
       </div>
       <div class="h-card">
-        <table><thead><tr><th>부</th><th>이름</th><th>회사</th><th>직책</th><th>이메일</th><th>핸드폰</th><th>접속</th><th>설문</th><th>순위</th><th>점수</th><th>당첨여부</th><th>당첨경품</th></tr></thead>
-          <tbody id="peopleRows"><tr><td colspan="12" class="text-[var(--muted)]">불러오는 중…</td></tr></tbody>
+        <table><thead><tr><th>부</th><th>이름</th><th>회사</th><th>직책</th><th>이메일</th><th>핸드폰</th><th>접속</th><th>부스</th><th>설문</th><th>순위</th><th>점수</th><th>당첨여부</th><th>당첨경품</th></tr></thead>
+          <tbody id="peopleRows"><tr><td colspan="13" class="text-[var(--muted)]">불러오는 중…</td></tr></tbody>
         </table>
       </div>
       <p class="text-[14px] text-[var(--muted)] mt-3">
@@ -311,6 +309,7 @@
     var r=await rpc('admin_stats'); if(r.error){ toast(r.error.message); return; }
     var d=r.data||{};
     el('s_part').textContent=d.participants||0; el('s_survey').textContent=d.survey_done||0;
+    el('s_booth').textContent=d.booth_done||0;
     el('s_e1').textContent=d.entries_p1||0; el('s_e2').textContent=d.entries_p2||0;
     // 타입 분포
     var a=d.type_a||0, b=d.type_b||0, c=d.type_c||0, tot=a+b+c;
@@ -332,7 +331,6 @@
     var r=await rpc('admin_get_booth'); if(r.error){ return; }
     var d=r.data && r.data[0]; if(!d) return;
     el('adminBoothPin').value=d.pin||''; el('adminBoothTitle').value=d.title||'';
-    el('boothCount').textContent='인증 '+(d.done_count||0)+'명';
   }
   el('adminBoothSave').addEventListener('click', async function(){
     var r=await rpc('admin_set_booth', { p_pin:el('adminBoothPin').value.trim(), p_title:el('adminBoothTitle').value.trim() });
@@ -572,11 +570,12 @@
         +'<td><b>'+esc(p.name||'-')+'</b></td><td>'+esc(p.company||'-')+'</td><td>'+esc(p.title||'-')+'</td>'
         +'<td class="text-[14px]">'+esc(p.email)+'</td><td>'+esc(p.phone||'-')+'</td>'
         +'<td>'+(p.connected?'<span class="chip chip-green">접속</span>':'<span class="chip chip-gray">미접속</span>')+'</td>'
+        +'<td>'+(p.booth_done?'<span class="chip chip-green">완료</span>':'<span class="chip chip-gray">미완료</span>')+'</td>'
         +'<td>'+(p.survey_done?'<span class="chip chip-green">완료</span>':'<span class="chip chip-gray">미완료</span>')+'</td>'
         +'<td>'+(p.rank!=null?('<b>'+p.rank+'위</b>'):'-')+'</td>'
         +'<td>'+(p.total_points!=null?p.total_points:'-')+'</td>'
         +'<td>'+won+'</td><td>'+prizeText+'</td></tr>';
-    }).join('') : '<tr><td colspan="12" class="text-[var(--muted)]">등록된 참가자가 없습니다.</td></tr>';
+    }).join('') : '<tr><td colspan="13" class="text-[var(--muted)]">등록된 참가자가 없습니다.</td></tr>';
   }
   el('peopleReload').addEventListener('click', loadPeople);
 
