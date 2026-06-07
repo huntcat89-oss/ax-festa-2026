@@ -98,12 +98,26 @@
         <div class="h-card"><div class="label">2부 퀴즈 입장</div><div id="s_e2" class="stat mt-1">—</div></div>
       </div>
 
-      <div class="h-card mt-4">
-        <div class="flex items-center justify-between">
-          <div class="label">나의 AX 유형 분포 (설문 완료자 기준)</div>
-          <span id="typeTotal" class="text-[14px] text-[var(--muted)]">—</span>
+      <div class="grid grid-cols-2 gap-4 mt-4">
+        <div class="h-card">
+          <div class="flex items-center justify-between">
+            <div class="label">나의 AX 유형 분포 (설문 완료자 기준)</div>
+            <span id="typeTotal" class="text-[14px] text-[var(--muted)]">—</span>
+          </div>
+          <div id="typeDist" class="mt-4 space-y-4"></div>
         </div>
-        <div id="typeDist" class="mt-4 space-y-4"></div>
+        <div class="h-card">
+          <div class="flex items-center justify-between">
+            <div class="label">부스 스탬프</div>
+            <span id="boothCount" class="text-[14px] text-[var(--muted)]">—</span>
+          </div>
+          <div class="mt-4 flex items-end gap-3">
+            <div><div class="text-[14px] text-[var(--muted)] mb-1">부스 PIN</div><input id="adminBoothPin" class="inp" style="width:130px" placeholder="예: 2026" /></div>
+            <div class="flex-1"><div class="text-[14px] text-[var(--muted)] mb-1">부스 이름</div><input id="adminBoothTitle" class="inp w-full" placeholder="AX 체험 부스" /></div>
+            <button id="adminBoothSave" class="btn">저장</button>
+          </div>
+          <div class="text-[14px] text-[var(--muted)] mt-3">참가자는 이 PIN을 부스 화면에 입력해 스탬프를 받습니다.</div>
+        </div>
       </div>
 
       <p class="text-[14px] text-[var(--muted)] mt-4">※ 자동 새로고침(15초). 새로고침 버튼 <button id="dashReload" class="pill">↻ 지금</button></p>
@@ -309,10 +323,21 @@
         +'<span class="text-[var(--muted)]">'+v+'명 · '+pct+'%</span></div>'
         +'<div class="bar"><span style="width:'+pct+'%; background:'+info.c+'"></span></div></div>';
     }).join('');
+    loadBooth();
     if(dashTimer) clearInterval(dashTimer);
     dashTimer=setInterval(function(){ if(el('dash').classList.contains('on')) loadDash(); }, 15000);
   }
   el('dashReload').addEventListener('click', loadDash);
+  async function loadBooth(){
+    var r=await rpc('admin_get_booth'); if(r.error){ return; }
+    var d=r.data && r.data[0]; if(!d) return;
+    el('adminBoothPin').value=d.pin||''; el('adminBoothTitle').value=d.title||'';
+    el('boothCount').textContent='인증 '+(d.done_count||0)+'명';
+  }
+  el('adminBoothSave').addEventListener('click', async function(){
+    var r=await rpc('admin_set_booth', { p_pin:el('adminBoothPin').value.trim(), p_title:el('adminBoothTitle').value.trim() });
+    if(r.error){ toast('저장 오류: '+r.error.message); return; } toast('부스 설정 저장됨'); loadBooth();
+  });
 
   // ── 퀴즈 운영 ──
   var quizPart=1;

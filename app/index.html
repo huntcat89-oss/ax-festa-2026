@@ -278,6 +278,31 @@
       </div>
     </div>
 
+    <!-- 11) 부스 스탬프 -->
+    <div id="booth" class="screen">
+      <div class="flex items-center justify-between text-[14px] text-[var(--muted-2)]">
+        <span class="font-bold" style="color:var(--violet-soft);">부스 스탬프</span>
+        <button id="boothBack" class="text-[var(--muted)] underline">← 홈</button>
+      </div>
+      <div class="flex-1 flex flex-col items-center justify-center text-center">
+        <div id="boothStamp" class="w-32 h-32 rounded-full flex items-center justify-center text-[48px]"
+             style="background:linear-gradient(135deg,rgba(20,184,166,.25),rgba(27,21,64,.6)); border:1px solid var(--line);">🎪</div>
+        <h1 id="boothTitle" class="mt-5 text-[22px] font-extrabold">AX 체험 부스</h1>
+
+        <div id="boothForm" class="w-full mt-4">
+          <p class="text-[14px] text-[var(--muted)]">부스에서 안내하는 PIN을 입력하세요</p>
+          <input id="boothPin" class="inp mt-3 text-center tracking-[0.4em] text-[20px] font-bold" inputmode="numeric" maxlength="6" placeholder="PIN" />
+          <div id="boothMsg" class="text-[14px] mt-2" style="display:none;"></div>
+          <button id="boothBtn" class="v-btn mt-3">인증하기</button>
+        </div>
+
+        <div id="boothDone" style="display:none;" class="mt-4">
+          <div class="text-[20px] font-extrabold gtext">✓ 인증 완료</div>
+          <p class="text-[14px] text-[var(--muted)] mt-2">부스 방문 스탬프가 적립되었어요. 감사합니다!</p>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 <div id="toast" class="toast"></div>
@@ -287,7 +312,7 @@
 <script src="js/supabase.js"></script>
 <script>
 (function(){
-  var screens = ['loading','login','blocked','home','survey','axresult','quizentry','quizwait','quizQ','quizresult','myprize'];
+  var screens = ['loading','login','blocked','home','survey','axresult','quizentry','quizwait','quizQ','quizresult','myprize','booth'];
   function show(id){ screens.forEach(function(s){ document.getElementById(s).classList.toggle('on', s===id); }); }
   var el = function(id){ return document.getElementById(id); };
   function lmsg(text, ok){ var e=el('loginMsg'); e.textContent=text; e.style.color = ok?'#6EE7A0':'#FF6B6B'; e.style.display='block'; }
@@ -567,6 +592,38 @@
       + '</div>' + prizeBlock + '</div>';
   }
 
+  // ───────────── 부스 스탬프 ─────────────
+  el('boothBack').addEventListener('click', function(){ show('home'); });
+  function renderBooth(done){
+    if(done){
+      el('boothForm').style.display='none'; el('boothDone').style.display='block';
+      el('boothStamp').textContent='✓';
+      el('boothStamp').style.background='linear-gradient(135deg,#8B2BFF,#6A3CFF)';
+    } else {
+      el('boothForm').style.display='block'; el('boothDone').style.display='none';
+      el('boothStamp').textContent='🎪';
+      el('boothStamp').style.background='linear-gradient(135deg,rgba(20,184,166,.25),rgba(27,21,64,.6))';
+    }
+  }
+  async function startBooth(){
+    el('boothMsg').style.display='none'; el('boothPin').value='';
+    show('booth');
+    var r=await db.rpc('booth_status', { p_email:getEmail() });
+    var d=r.data && r.data[0];
+    el('boothTitle').textContent = (d && d.title) ? d.title : 'AX 체험 부스';
+    renderBooth(d && d.booth_done);
+  }
+  el('boothBtn').addEventListener('click', async function(){
+    var pin=el('boothPin').value.trim(); var m=el('boothMsg');
+    if(!pin){ m.textContent='PIN을 입력하세요.'; m.style.color='#FF6B6B'; m.style.display='block'; return; }
+    var btn=this; btn.disabled=true; btn.innerHTML='<span class="spin"></span> 확인 중…';
+    var r=await db.rpc('booth_checkin', { p_email:getEmail(), p_pin:pin });
+    btn.disabled=false; btn.textContent='인증하기';
+    if(r.error){ m.textContent='오류: '+r.error.message; m.style.color='#FF6B6B'; m.style.display='block'; return; }
+    if(r.data==='ok'){ toast('부스 인증 완료! 🎪'); renderBooth(true); }
+    else { m.textContent='PIN이 올바르지 않아요.'; m.style.color='#FF6B6B'; m.style.display='block'; }
+  });
+
   // ───────────── 홈 메뉴 ─────────────
   document.querySelectorAll('[data-go]').forEach(function(b){
     b.addEventListener('click', function(){
@@ -574,7 +631,7 @@
       if(go==='survey'){ startSurvey(); return; }
       if(go==='quiz'){ startQuizFlow(); return; }
       if(go==='myprize'){ startMyPrize(); return; }
-      toast('부스 스탬프 — 화면 제작 중입니다 🚧');
+      if(go==='booth'){ startBooth(); return; }
     });
   });
 
