@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AX Festa 2026 — 관리자</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet" />
+<style>
+  :root{ --violet:#8B2BFF; --ink:#0B1020; --muted:#5B6478; --muted-2:#8A92A6;
+    --line:#E5E7EE; --page:#F4F5F8; --surface:#FFFFFF; --surface-2:#F4F2FB; }
+  html,body{font-family:"Pretendard Variable",Pretendard,system-ui,sans-serif; margin:0; background:var(--page); color:var(--ink); font-size:15px;}
+  .wrap{max-width:1920px; margin:0 auto; padding:0 28px;}
+  .h-card{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:18px;}
+  .label{font-size:12px; color:var(--muted); font-weight:700; letter-spacing:.04em; text-transform:uppercase;}
+  .stat{font-size:30px; font-weight:800; letter-spacing:-.02em;}
+  .btn{background:var(--violet); color:#fff; font-weight:700; border:0; border-radius:10px; padding:10px 16px; cursor:pointer; font-size:14px;}
+  .btn-ghost{background:#fff; color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:10px 16px; cursor:pointer; font-size:14px; font-weight:600;}
+  .btn-red{background:#fff; color:#D33A3A; border:1px solid #F3C2C2; border-radius:10px; padding:8px 14px; cursor:pointer; font-size:13px; font-weight:700;}
+  .btn-go{background:#188038; color:#fff; border:0; border-radius:10px; padding:8px 14px; cursor:pointer; font-size:13px; font-weight:700;}
+  .inp{border:1px solid var(--line); border-radius:9px; padding:9px 12px; font-size:14px; outline:none; background:#fff; color:var(--ink);}
+  .inp:focus{border-color:var(--violet);}
+  .chip{display:inline-flex; align-items:center; gap:5px; font-size:12px; padding:4px 9px; border-radius:999px; background:#EDE3FF; color:#6A3CFF; font-weight:700;}
+  .chip-red{background:#FDECEC; color:#D33A3A;} .chip-green{background:#E6F6EC; color:#137333;} .chip-gray{background:#EEF0F4; color:#5B6478;}
+  .bar{height:9px; background:#ECECF5; border-radius:999px; overflow:hidden;}
+  .bar>span{display:block; height:100%; background:linear-gradient(90deg,#8B2BFF,#E608FF);}
+  table{width:100%; border-collapse:collapse;}
+  th{font-size:12px; text-transform:uppercase; color:var(--muted); text-align:left; padding:10px 10px; border-bottom:1px solid var(--line); font-weight:700;}
+  td{font-size:14px; padding:11px 10px; border-bottom:1px solid var(--line);}
+  .rank{display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:50%; background:#E5E7EE; color:#3A4255; font-size:12px; font-weight:700;}
+  .rank.g{background:#F5B400;color:#1A1200;} .rank.s{background:#9AA3B5;color:#10121A;} .rank.b{background:#C97A3F;color:#fff;}
+  .navtab{padding:10px 16px; border-radius:10px; font-weight:700; font-size:14px; color:var(--muted); cursor:pointer; background:transparent; border:0;}
+  .navtab.on{background:#fff; color:var(--ink); box-shadow:0 1px 3px rgba(0,0,0,.08);}
+  .pill{display:inline-flex; align-items:center; font-size:12px; padding:4px 10px; border-radius:999px; border:1px solid var(--line); color:var(--muted); cursor:pointer;}
+  .pill.on{background:var(--violet); color:#fff; border-color:var(--violet);}
+  .sec{display:none;} .sec.on{display:block;}
+  .spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;display:inline-block;animation:s .7s linear infinite;vertical-align:-2px;}
+  @keyframes s{to{transform:rotate(360deg)}}
+  .modal{position:fixed; inset:0; background:rgba(10,8,30,.5); display:none; align-items:center; justify-content:center; z-index:60; padding:20px;}
+  .modal.on{display:flex;}
+  .toast{position:fixed; left:50%; bottom:30px; transform:translateX(-50%); background:#15102E; color:#fff; padding:12px 18px; border-radius:10px; font-size:14px; opacity:0; transition:.2s; z-index:80; pointer-events:none;}
+  .toast.on{opacity:1;}
+</style>
+</head>
+<body>
+
+<!-- 로그인 -->
+<div id="login" style="min-height:100vh; display:flex; align-items:center; justify-content:center;">
+  <div class="h-card" style="width:360px;">
+    <div class="w-10 h-10 rounded-xl" style="background:linear-gradient(135deg,#8B2BFF,#6A3CFF)"></div>
+    <h3 class="text-lg font-bold mt-4">AX Festa 관리자</h3>
+    <p class="text-[13px] text-[var(--muted)] mt-1">운영팀 전용. 비밀번호를 입력하세요.</p>
+    <div class="mt-5">
+      <div class="label mb-2">Password</div>
+      <input id="pw" type="password" class="inp w-full" placeholder="비밀번호" />
+      <div id="pwMsg" class="text-[13px] mt-2" style="display:none;color:#D33A3A;"></div>
+    </div>
+    <button id="loginBtn" class="btn w-full mt-4">로그인</button>
+  </div>
+</div>
+
+<!-- 본문 -->
+<div id="app" style="display:none;">
+  <header style="background:#fff; border-bottom:1px solid var(--line);">
+    <div class="wrap flex items-center justify-between" style="padding-top:14px; padding-bottom:14px;">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl" style="background:linear-gradient(135deg,#8B2BFF,#6A3CFF)"></div>
+        <div><div class="text-[12px] text-[var(--muted)] font-semibold">FLOW · AX FESTA 2026</div>
+          <div class="text-[17px] font-bold">운영 관리자</div></div>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="chip chip-red">● LIVE</span>
+        <button id="logout" class="btn-ghost">로그아웃</button>
+      </div>
+    </div>
+    <div class="wrap flex gap-1 pb-3">
+      <button class="navtab on" data-tab="dash">대시보드</button>
+      <button class="navtab" data-tab="quiz">퀴즈 운영</button>
+      <button class="navtab" data-tab="rank">종합 순위</button>
+      <button class="navtab" data-tab="prize">경품 설정</button>
+      <button class="navtab" data-tab="people">참가자</button>
+    </div>
+  </header>
+
+  <main class="wrap" style="padding-top:24px; padding-bottom:60px;">
+
+    <!-- 대시보드 -->
+    <section id="dash" class="sec on">
+      <h2 class="text-xl font-bold mb-4">실시간 대시보드</h2>
+      <div class="grid grid-cols-5 gap-4">
+        <div class="h-card"><div class="label">등록 참가자</div><div id="s_part" class="stat mt-1">—</div></div>
+        <div class="h-card"><div class="label">설문 완료</div><div id="s_survey" class="stat mt-1">—</div></div>
+        <div class="h-card"><div class="label">1부 퀴즈 입장</div><div id="s_e1" class="stat mt-1">—</div></div>
+        <div class="h-card"><div class="label">2부 퀴즈 입장</div><div id="s_e2" class="stat mt-1">—</div></div>
+        <div class="h-card"><div class="label">총 답안 수</div><div id="s_ans" class="stat mt-1">—</div></div>
+      </div>
+      <p class="text-[13px] text-[var(--muted)] mt-4">※ 자동 새로고침(15초). 새로고침 버튼 <button id="dashReload" class="pill">↻ 지금</button></p>
+    </section>
+
+    <!-- 퀴즈 운영 -->
+    <section id="quiz" class="sec">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold">퀴즈 운영</h2>
+        <div class="flex gap-2">
+          <span class="pill q-part on" data-part="1">1부 (8문항)</span>
+          <span class="pill q-part" data-part="2">2부 (11문항)</span>
+        </div>
+      </div>
+      <div class="grid grid-cols-12 gap-5">
+        <div class="h-card col-span-7">
+          <div class="label mb-2">문항 목록 — 관리자가 한 문항씩 시작</div>
+          <table><thead><tr><th>#</th><th>발표자 · 질문</th><th>정답</th><th>상태</th><th></th></tr></thead>
+            <tbody id="quizRows"><tr><td colspan="5" class="text-[var(--muted)]">불러오는 중…</td></tr></tbody>
+          </table>
+        </div>
+        <div class="h-card col-span-5">
+          <div class="flex items-center justify-between">
+            <div class="label">라이브 모니터</div>
+            <span id="liveTag" class="chip chip-gray">대기 중</span>
+          </div>
+          <div id="liveBox" class="mt-3 text-[14px] text-[var(--muted)]">진행 중인 문항이 없습니다. 왼쪽에서 [시작]을 누르세요.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 종합 순위 -->
+    <section id="rank" class="sec">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold">종합 순위 (속도순 누적 점수)</h2>
+        <div class="flex gap-2">
+          <span class="pill r-part on" data-part="1">1부</span>
+          <span class="pill r-part" data-part="2">2부</span>
+        </div>
+      </div>
+      <div class="h-card">
+        <table><thead><tr><th>순위</th><th>닉네임 · 회사</th><th>점수</th><th>정답</th><th>설문</th><th>이메일</th></tr></thead>
+          <tbody id="rankRows"><tr><td colspan="6" class="text-[var(--muted)]">불러오는 중…</td></tr></tbody>
+        </table>
+      </div>
+      <p class="text-[13px] text-[var(--muted)] mt-3">※ 설문 미완료자는 순위는 유지되며 수령만 보류됩니다.</p>
+    </section>
+
+    <!-- 경품 설정 -->
+    <section id="prize" class="sec">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold">순위별 경품 설정 (1~150위)</h2>
+        <div class="flex gap-2">
+          <span class="pill p-part on" data-part="1">1부</span>
+          <span class="pill p-part" data-part="2">2부</span>
+        </div>
+      </div>
+      <div class="grid grid-cols-12 gap-5">
+        <div class="col-span-4">
+          <div class="h-card">
+            <div class="label">구간 일괄 입력</div>
+            <div class="mt-3 flex items-center gap-2">
+              <input id="pFrom" type="number" min="1" max="150" value="1" class="inp w-full" />
+              <span class="text-[var(--muted)]">~</span>
+              <input id="pTo" type="number" min="1" max="150" value="20" class="inp w-full" />
+            </div>
+            <input id="pName" type="text" placeholder="예: 스타벅스 기프티콘 (비우면 구간 비움)" class="inp w-full mt-2" />
+            <button id="pApply" class="btn w-full mt-3">구간 일괄 적용</button>
+            <div class="mt-4 pt-3" style="border-top:1px solid var(--line)">
+              <div class="label">상품별 수량</div>
+              <div id="pBreak" class="mt-2 text-[13px]" style="max-height:200px; overflow:auto;"></div>
+            </div>
+            <button id="pSave" class="btn-go w-full mt-4" style="padding:11px;">💾 저장 (DB 반영)</button>
+            <div id="pSaveMsg" class="text-[13px] mt-2" style="display:none;"></div>
+          </div>
+        </div>
+        <div class="col-span-8">
+          <div class="h-card">
+            <div class="label mb-3">순위별 상품 (빈 칸 = 상품 없음)</div>
+            <div id="pList" class="grid grid-cols-2 gap-x-5 gap-y-2" style="max-height:560px; overflow:auto;"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 참가자 -->
+    <section id="people" class="sec">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold">참가자 명단</h2>
+        <button id="peopleReload" class="pill">↻ 새로고침</button>
+      </div>
+      <div class="h-card">
+        <table><thead><tr><th>이름</th><th>회사</th><th>직책</th><th>이메일</th><th>핸드폰</th><th>설문</th></tr></thead>
+          <tbody id="peopleRows"><tr><td colspan="6" class="text-[var(--muted)]">불러오는 중…</td></tr></tbody>
+        </table>
+      </div>
+      <p class="text-[13px] text-[var(--muted)] mt-3">※ 명단은 구글시트 동기화로 채웁니다(다음 단계). 지금은 DB에 직접 추가된 인원이 표시됩니다.</p>
+    </section>
+
+  </main>
+</div>
+
+<!-- 문항 편집 모달 -->
+<div id="editModal" class="modal">
+  <div class="h-card" style="width:480px; max-height:90vh; overflow:auto;">
+    <h3 class="text-lg font-bold">문항 편집 <span id="emTitle" class="text-[var(--muted)] text-sm"></span></h3>
+    <div class="mt-3 space-y-2">
+      <div><div class="label mb-1">발표자</div><input id="emSpeaker" class="inp w-full" /></div>
+      <div><div class="label mb-1">질문</div><textarea id="emQ" class="inp w-full" rows="2"></textarea></div>
+      <div><div class="label mb-1">이미지 URL (선택)</div><input id="emImg" class="inp w-full" placeholder="https://..." /></div>
+      <div class="grid grid-cols-1 gap-2">
+        <input id="emO1" class="inp w-full" placeholder="보기 1" />
+        <input id="emO2" class="inp w-full" placeholder="보기 2" />
+        <input id="emO3" class="inp w-full" placeholder="보기 3" />
+        <input id="emO4" class="inp w-full" placeholder="보기 4" />
+      </div>
+      <div class="flex items-center gap-3">
+        <div><div class="label mb-1">정답</div>
+          <select id="emAns" class="inp"><option value="1">1번</option><option value="2">2번</option><option value="3">3번</option><option value="4">4번</option></select></div>
+        <div><div class="label mb-1">제한시간(초)</div><input id="emTime" type="number" class="inp" style="width:90px" value="30" /></div>
+      </div>
+    </div>
+    <div class="flex gap-2 mt-4">
+      <button id="emCancel" class="btn-ghost flex-1">취소</button>
+      <button id="emSave" class="btn flex-1">저장</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script src="js/supabase.js"></script>
+<script>
+(function(){
+  var el=function(id){return document.getElementById(id);};
+  var PW='';
+  var toastT;
+  function toast(t){ var e=el('toast'); e.textContent=t; e.classList.add('on'); clearTimeout(toastT); toastT=setTimeout(function(){e.classList.remove('on');},2400); }
+  async function rpc(name, args){ args=args||{}; args.p_password=PW; return db.rpc(name, args); }
+  function esc(s){ return (s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  // ── 로그인 ──
+  async function doLogin(){
+    var pw=el('pw').value;
+    var btn=el('loginBtn'); btn.disabled=true; btn.innerHTML='<span class="spin"></span>';
+    var r=await db.rpc('admin_check',{p_password:pw});
+    btn.disabled=false; btn.textContent='로그인';
+    if(r.error){ el('pwMsg').textContent='오류: '+r.error.message; el('pwMsg').style.display='block'; return; }
+    if(r.data===true){ PW=pw; try{sessionStorage.setItem('axpw',pw);}catch(_){}; el('login').style.display='none'; el('app').style.display='block'; openTab('dash'); }
+    else { el('pwMsg').textContent='비밀번호가 올바르지 않습니다.'; el('pwMsg').style.display='block'; }
+  }
+  el('loginBtn').addEventListener('click', doLogin);
+  el('pw').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+  el('logout').addEventListener('click', function(){ try{sessionStorage.removeItem('axpw');}catch(_){}; location.reload(); });
+
+  // ── 탭 ──
+  var liveTimer=null;
+  function openTab(t){
+    document.querySelectorAll('.navtab').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-tab')===t); });
+    document.querySelectorAll('.sec').forEach(function(s){ s.classList.toggle('on', s.id===t); });
+    if(liveTimer){ clearInterval(liveTimer); liveTimer=null; }
+    if(t==='dash') loadDash();
+    if(t==='quiz') loadQuizzes();
+    if(t==='rank') loadRank();
+    if(t==='prize') loadPrizes();
+    if(t==='people') loadPeople();
+  }
+  document.querySelectorAll('.navtab').forEach(function(b){ b.addEventListener('click', function(){ openTab(b.getAttribute('data-tab')); }); });
+
+  // ── 대시보드 ──
+  var dashTimer=null;
+  async function loadDash(){
+    var r=await rpc('admin_stats'); if(r.error){ toast(r.error.message); return; }
+    var d=r.data||{};
+    el('s_part').textContent=d.participants||0; el('s_survey').textContent=d.survey_done||0;
+    el('s_e1').textContent=d.entries_p1||0; el('s_e2').textContent=d.entries_p2||0; el('s_ans').textContent=d.answers||0;
+    if(dashTimer) clearInterval(dashTimer);
+    dashTimer=setInterval(function(){ if(el('dash').classList.contains('on')) loadDash(); }, 15000);
+  }
+  el('dashReload').addEventListener('click', loadDash);
+
+  // ── 퀴즈 운영 ──
+  var quizPart=1;
+  document.querySelectorAll('.q-part').forEach(function(b){ b.addEventListener('click', function(){
+    document.querySelectorAll('.q-part').forEach(function(x){x.classList.remove('on');}); b.classList.add('on');
+    quizPart=parseInt(b.getAttribute('data-part'),10); loadQuizzes();
+  });});
+  var quizCache=[];
+  async function loadQuizzes(){
+    var r=await rpc('admin_list_quizzes',{p_part:quizPart}); if(r.error){ toast(r.error.message); return; }
+    quizCache=r.data||[];
+    var live=quizCache.filter(function(q){return q.status==='live';})[0];
+    el('quizRows').innerHTML = quizCache.map(function(q){
+      var st = q.status==='live'?'<span class="chip chip-red">● LIVE</span>'
+             : q.status==='closed'?'<span class="chip chip-green">종료</span>'
+             : q.status==='ready'?'<span class="chip">대기</span>':'<span class="chip chip-gray">초안</span>';
+      var act = q.status==='live'
+        ? '<button class="btn-red" data-stop="'+q.id+'">종료</button>'
+        : '<button class="btn-go" data-start="'+q.id+'">시작</button>';
+      return '<tr><td><b>'+q.order_no+'</b></td>'
+        +'<td><div class="font-semibold">'+esc(q.speaker||'')+'</div><div class="text-[12px] text-[var(--muted)]">'+esc((q.question||'').slice(0,40))+'</div></td>'
+        +'<td>'+q.answer_idx+'번</td><td>'+st+'</td>'
+        +'<td class="text-right whitespace-nowrap">'+act+' <button class="btn-ghost" style="padding:7px 10px" data-edit="'+q.id+'">편집</button></td></tr>';
+    }).join('');
+    bindQuizButtons();
+    if(live){ el('liveTag').className='chip chip-red'; el('liveTag').textContent='● '+live.order_no+'번 진행 중'; startLive(live); }
+    else { el('liveTag').className='chip chip-gray'; el('liveTag').textContent='대기 중';
+      el('liveBox').innerHTML='진행 중인 문항이 없습니다. 왼쪽에서 [시작]을 누르세요.'; if(liveTimer){clearInterval(liveTimer);liveTimer=null;} }
+  }
+  function bindQuizButtons(){
+    document.querySelectorAll('[data-start]').forEach(function(b){ b.addEventListener('click', async function(){
+      var r=await rpc('admin_set_quiz_status',{p_quiz_id:b.getAttribute('data-start'), p_status:'live'});
+      if(r.error){ toast(r.error.message); return; } toast('문항을 시작했어요.'); loadQuizzes();
+    });});
+    document.querySelectorAll('[data-stop]').forEach(function(b){ b.addEventListener('click', async function(){
+      var r=await rpc('admin_set_quiz_status',{p_quiz_id:b.getAttribute('data-stop'), p_status:'closed'});
+      if(r.error){ toast(r.error.message); return; } toast('문항을 종료했어요.'); loadQuizzes();
+    });});
+    document.querySelectorAll('[data-edit]').forEach(function(b){ b.addEventListener('click', function(){ openEdit(b.getAttribute('data-edit')); });});
+  }
+  function startLive(q){
+    if(liveTimer){ clearInterval(liveTimer); }
+    renderLive(q); liveTimer=setInterval(function(){ if(el('quiz').classList.contains('on')) renderLive(q); else {clearInterval(liveTimer);liveTimer=null;} }, 2000);
+  }
+  async function renderLive(q){
+    var r=await rpc('admin_live_stats',{p_quiz_id:q.id}); if(r.error){ return; }
+    var d=r.data||{}; var dist=d.dist||{}; var total=d.total||0; var opts=q.options||[];
+    var bars=opts.map(function(t,i){
+      var n=parseInt(dist[(i+1)]||0,10); var pct=total?Math.round(n/total*1000)/10:0;
+      var correct=(i+1)===d.answer_idx;
+      return '<div class="mb-2"><div class="flex justify-between text-[13px]"><span><b>'+(i+1)+'</b> '+esc(t)+(correct?' <span class="chip chip-green" style="margin-left:4px">정답</span>':'')+'</span><span>'+n+'명 · '+pct+'%</span></div>'
+        +'<div class="bar mt-1"><span style="width:'+pct+'%;'+(correct?'background:#16A34A':'background:#9AA3B5')+'"></span></div></div>';
+    }).join('');
+    var ranks=(d.ranks||[]).map(function(x,i){
+      var c=i===0?'g':i===1?'s':i===2?'b':'';
+      return '<div class="flex items-center justify-between" style="padding:6px 0;border-bottom:1px solid var(--line)"><span><span class="rank '+c+'">'+(i+1)+'</span> '+esc(x.nickname)+' <span class="text-[12px] text-[var(--muted)]">'+esc(x.company||'')+'</span></span><span class="text-[13px] text-[var(--muted)]">+'+x.sec+'s</span></div>';
+    }).join('') || '<div class="text-[var(--muted)] text-[13px]">아직 정답자가 없습니다.</div>';
+    el('liveBox').innerHTML='<div class="label mb-1">응답 분포 · '+total+'명</div>'+bars
+      +'<div class="label mt-4 mb-1">정답 순위 (속도순)</div>'+ranks;
+  }
+
+  // ── 문항 편집 ──
+  var editId=null;
+  function openEdit(id){
+    var q=quizCache.filter(function(x){return x.id===id;})[0]; if(!q) return; editId=id;
+    el('emTitle').textContent=q.part+'부 · '+q.order_no+'번';
+    el('emSpeaker').value=q.speaker||''; el('emQ').value=q.question||''; el('emImg').value=q.image_url||'';
+    var o=q.options||[]; el('emO1').value=o[0]||''; el('emO2').value=o[1]||''; el('emO3').value=o[2]||''; el('emO4').value=o[3]||'';
+    el('emAns').value=String(q.answer_idx||1); el('emTime').value=q.time_limit||30;
+    el('editModal').classList.add('on'); editPart=q.part; editOrder=q.order_no;
+  }
+  var editPart, editOrder;
+  el('emCancel').addEventListener('click', function(){ el('editModal').classList.remove('on'); });
+  el('emSave').addEventListener('click', async function(){
+    var opts=[el('emO1').value,el('emO2').value,el('emO3').value,el('emO4').value];
+    var r=await rpc('admin_upsert_quiz',{ p_part:editPart, p_order:editOrder, p_speaker:el('emSpeaker').value,
+      p_question:el('emQ').value, p_options:opts, p_answer_idx:parseInt(el('emAns').value,10),
+      p_time_limit:parseInt(el('emTime').value,10)||30, p_image_url:el('emImg').value||null });
+    if(r.error){ toast('저장 오류: '+r.error.message); return; }
+    el('editModal').classList.remove('on'); toast('저장했어요.'); loadQuizzes();
+  });
+
+  // ── 종합 순위 ──
+  var rankPart=1;
+  document.querySelectorAll('.r-part').forEach(function(b){ b.addEventListener('click', function(){
+    document.querySelectorAll('.r-part').forEach(function(x){x.classList.remove('on');}); b.classList.add('on');
+    rankPart=parseInt(b.getAttribute('data-part'),10); loadRank();
+  });});
+  async function loadRank(){
+    var r=await rpc('admin_leaderboard',{p_part:rankPart}); if(r.error){ toast(r.error.message); return; }
+    var rows=r.data||[];
+    el('rankRows').innerHTML = rows.length? rows.map(function(x){
+      var c=x.rank===1?'g':x.rank===2?'s':x.rank===3?'b':'';
+      return '<tr><td><span class="rank '+c+'">'+x.rank+'</span></td>'
+        +'<td><b>'+esc(x.nickname||'-')+'</b> <span class="text-[12px] text-[var(--muted)]">'+esc(x.company||'')+'</span></td>'
+        +'<td><b>'+x.total_points+'</b></td><td>'+x.correct_count+'</td>'
+        +'<td>'+(x.survey_done?'<span class="chip chip-green">완료</span>':'<span class="chip chip-red">미완료</span>')+'</td>'
+        +'<td class="text-[12px] text-[var(--muted)]">'+esc(x.email)+'</td></tr>';
+    }).join('') : '<tr><td colspan="6" class="text-[var(--muted)]">아직 응답이 없습니다.</td></tr>';
+  }
+
+  // ── 경품 설정 ──
+  var prizePart=1, prizes=new Array(150).fill('');
+  document.querySelectorAll('.p-part').forEach(function(b){ b.addEventListener('click', function(){
+    document.querySelectorAll('.p-part').forEach(function(x){x.classList.remove('on');}); b.classList.add('on');
+    prizePart=parseInt(b.getAttribute('data-part'),10); loadPrizes();
+  });});
+  async function loadPrizes(){
+    prizes=new Array(150).fill('');
+    var r=await rpc('admin_get_prizes',{p_part:prizePart}); if(r.error){ toast(r.error.message); return; }
+    (r.data||[]).forEach(function(p){ if(p.rank>=1&&p.rank<=150) prizes[p.rank-1]=p.prize||''; });
+    renderPrizes();
+  }
+  function renderPrizes(){
+    el('pList').innerHTML = prizes.map(function(v,i){
+      var r=i+1; var c=r===1?'g':r===2?'s':r===3?'b':'';
+      return '<div class="flex items-center gap-2"><span class="rank '+c+'">'+r+'</span>'
+        +'<input data-rank="'+i+'" value="'+esc(v).replace(/"/g,'&quot;')+'" placeholder="상품 없음" class="inp" style="flex:1;min-width:0;font-size:13px;padding:7px 9px"/></div>';
+    }).join('');
+    var set=prizes.filter(function(x){return x&&x.trim();}).length;
+    var counts={},order=[];
+    prizes.forEach(function(x){ x=(x||'').trim(); if(!x)return; if(counts[x]===undefined){counts[x]=0;order.push(x);} counts[x]++; });
+    order.sort(function(a,b){return counts[b]-counts[a];});
+    el('pBreak').innerHTML='<div class="font-bold mb-1">설정 '+set+' · 미설정 '+(150-set)+'</div>'+
+      (order.length? order.map(function(n){return '<div class="flex justify-between"><span class="truncate pr-2">'+esc(n)+'</span><span class="font-bold" style="color:#6A3CFF">'+counts[n]+'개</span></div>';}).join(''):'<div class="text-[var(--muted)]">없음</div>');
+  }
+  el('pList').addEventListener('input', function(e){ var t=e.target; if(t.hasAttribute('data-rank')){ prizes[+t.getAttribute('data-rank')]=t.value; } });
+  el('pApply').addEventListener('click', function(){
+    var s=parseInt(el('pFrom').value,10), e=parseInt(el('pTo').value,10), nm=el('pName').value;
+    if(isNaN(s)||isNaN(e)){ toast('순위를 입력하세요'); return; } if(s<1)s=1; if(e>150)e=150; if(s>e){var t=s;s=e;e=t;}
+    for(var k=s-1;k<e;k++) prizes[k]=nm; renderPrizes();
+  });
+  el('pSave').addEventListener('click', async function(){
+    var items=[]; for(var i=0;i<150;i++){ if((prizes[i]||'').trim()) items.push({rank:i+1, prize:prizes[i].trim()}); }
+    var btn=this; btn.disabled=true; btn.textContent='저장 중…';
+    var r=await rpc('admin_set_prizes',{p_part:prizePart, p_items:items});
+    btn.disabled=false; btn.textContent='💾 저장 (DB 반영)';
+    var m=el('pSaveMsg'); m.style.display='block';
+    if(r.error){ m.textContent='저장 오류: '+r.error.message; m.style.color='#D33A3A'; }
+    else { m.textContent='✓ 저장됐어요 ('+items.length+'개)'; m.style.color='#137333'; }
+  });
+
+  // ── 참가자 ──
+  async function loadPeople(){
+    var r=await rpc('admin_participants'); if(r.error){ toast(r.error.message); return; }
+    var rows=r.data||[];
+    el('peopleRows').innerHTML = rows.length? rows.map(function(p){
+      return '<tr><td><b>'+esc(p.name||'-')+'</b></td><td>'+esc(p.company||'-')+'</td><td>'+esc(p.title||'-')+'</td>'
+        +'<td class="text-[13px]">'+esc(p.email)+'</td><td>'+esc(p.phone||'-')+'</td>'
+        +'<td>'+(p.survey_done?'<span class="chip chip-green">완료</span>':'<span class="chip chip-gray">미완료</span>')+'</td></tr>';
+    }).join('') : '<tr><td colspan="6" class="text-[var(--muted)]">등록된 참가자가 없습니다.</td></tr>';
+  }
+  el('peopleReload').addEventListener('click', loadPeople);
+
+  // ── 자동 로그인(세션) ──
+  (function(){ try{ var s=sessionStorage.getItem('axpw'); if(s){ el('pw').value=s; doLogin(); } }catch(_){} })();
+})();
+</script>
+</body>
+</html>
