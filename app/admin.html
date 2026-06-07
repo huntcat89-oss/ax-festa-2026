@@ -238,10 +238,10 @@
       </div>
       <div><div class="label mb-1">보기 — 왼쪽 ○에 체크한 것이 정답</div>
         <div class="grid grid-cols-1 gap-2">
-          <label class="flex items-center gap-2"><input type="radio" name="emAns" value="1" style="width:18px;height:18px;"/><span class="font-bold" style="width:18px;">①</span><input id="emO1" class="inp" style="flex:1;" placeholder="보기 1" /></label>
-          <label class="flex items-center gap-2"><input type="radio" name="emAns" value="2" style="width:18px;height:18px;"/><span class="font-bold" style="width:18px;">②</span><input id="emO2" class="inp" style="flex:1;" placeholder="보기 2" /></label>
-          <label class="flex items-center gap-2"><input type="radio" name="emAns" value="3" style="width:18px;height:18px;"/><span class="font-bold" style="width:18px;">③</span><input id="emO3" class="inp" style="flex:1;" placeholder="보기 3" /></label>
-          <label class="flex items-center gap-2"><input type="radio" name="emAns" value="4" style="width:18px;height:18px;"/><span class="font-bold" style="width:18px;">④</span><input id="emO4" class="inp" style="flex:1;" placeholder="보기 4" /></label>
+          <label class="flex items-center gap-2"><input type="radio" name="emAns" value="1" style="width:18px;height:18px;"/><span class="font-bold" style="width:16px;">1</span><input id="emO1" class="inp" style="flex:1;" placeholder="보기 1" /></label>
+          <label class="flex items-center gap-2"><input type="radio" name="emAns" value="2" style="width:18px;height:18px;"/><span class="font-bold" style="width:16px;">2</span><input id="emO2" class="inp" style="flex:1;" placeholder="보기 2" /></label>
+          <label class="flex items-center gap-2"><input type="radio" name="emAns" value="3" style="width:18px;height:18px;"/><span class="font-bold" style="width:16px;">3</span><input id="emO3" class="inp" style="flex:1;" placeholder="보기 3" /></label>
+          <label class="flex items-center gap-2"><input type="radio" name="emAns" value="4" style="width:18px;height:18px;"/><span class="font-bold" style="width:16px;">4</span><input id="emO4" class="inp" style="flex:1;" placeholder="보기 4" /></label>
         </div>
       </div>
       <div><div class="label mb-1">제한시간(초)</div><input id="emTime" type="number" class="inp" style="width:90px" value="30" /></div>
@@ -329,7 +329,9 @@
       return '<tr><td><b>'+q.order_no+'</b></td>'
         +'<td><div class="font-semibold">'+esc(q.speaker||'')+'</div><div class="text-[14px] text-[var(--muted)]">'+esc((q.question||'').slice(0,40))+'</div></td>'
         +'<td>'+q.answer_idx+'번</td><td>'+st+'</td>'
-        +'<td class="text-right whitespace-nowrap">'+act+' <button class="btn-ghost" style="padding:7px 10px" data-edit="'+q.id+'">편집</button></td></tr>';
+        +'<td class="text-right whitespace-nowrap">'+act
+        +' <button class="btn-ghost" style="padding:7px 10px" data-edit="'+q.id+'">편집</button>'
+        +' <button class="btn-red" style="padding:7px 10px" data-del="'+q.id+'">삭제</button></td></tr>';
     }).join('');
     bindQuizButtons();
     if(live){ el('liveTag').className='chip chip-red'; el('liveTag').textContent='● '+live.order_no+'번 진행 중'; startLive(live); }
@@ -346,6 +348,11 @@
       if(r.error){ toast(r.error.message); return; } toast('문항을 종료했어요.'); loadQuizzes();
     });});
     document.querySelectorAll('[data-edit]').forEach(function(b){ b.addEventListener('click', function(){ openEdit(b.getAttribute('data-edit')); });});
+    document.querySelectorAll('[data-del]').forEach(function(b){ b.addEventListener('click', async function(){
+      if(!confirm('이 문항을 삭제할까요? (해당 문항의 응답도 함께 삭제됩니다)')) return;
+      var r=await rpc('admin_delete_quiz',{p_quiz_id:b.getAttribute('data-del')});
+      if(r.error){ toast('삭제 오류: '+r.error.message); return; } toast('삭제했어요.'); loadQuizzes();
+    });});
   }
   function startLive(q){
     if(liveTimer){ clearInterval(liveTimer); }
