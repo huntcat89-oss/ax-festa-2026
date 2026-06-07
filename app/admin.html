@@ -185,8 +185,8 @@
         <button id="peopleReload" class="btn-ghost">↻ 새로고침</button>
       </div>
       <div class="h-card">
-        <table><thead><tr><th>이름</th><th>회사</th><th>직책</th><th>이메일</th><th>핸드폰</th><th>설문</th></tr></thead>
-          <tbody id="peopleRows"><tr><td colspan="6" class="text-[var(--muted)]">불러오는 중…</td></tr></tbody>
+        <table><thead><tr><th>이름</th><th>회사</th><th>직책</th><th>이메일</th><th>핸드폰</th><th>접속</th><th>설문</th></tr></thead>
+          <tbody id="peopleRows"><tr><td colspan="7" class="text-[var(--muted)]">불러오는 중…</td></tr></tbody>
         </table>
       </div>
       <p class="text-[14px] text-[var(--muted)] mt-3">
@@ -478,8 +478,9 @@
     el('peopleRows').innerHTML = rows.length? rows.map(function(p){
       return '<tr><td><b>'+esc(p.name||'-')+'</b></td><td>'+esc(p.company||'-')+'</td><td>'+esc(p.title||'-')+'</td>'
         +'<td class="text-[14px]">'+esc(p.email)+'</td><td>'+esc(p.phone||'-')+'</td>'
+        +'<td>'+(p.connected?'<span class="chip chip-green">접속</span>':'<span class="chip chip-gray">미접속</span>')+'</td>'
         +'<td>'+(p.survey_done?'<span class="chip chip-green">완료</span>':'<span class="chip chip-gray">미완료</span>')+'</td></tr>';
-    }).join('') : '<tr><td colspan="6" class="text-[var(--muted)]">등록된 참가자가 없습니다.</td></tr>';
+    }).join('') : '<tr><td colspan="7" class="text-[var(--muted)]">등록된 참가자가 없습니다.</td></tr>';
   }
   el('peopleReload').addEventListener('click', loadPeople);
 
