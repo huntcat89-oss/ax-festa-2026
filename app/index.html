@@ -254,7 +254,7 @@
       <div class="rounded-xl p-3 mt-3 text-center" style="background:rgba(255,77,77,.1); border:1px solid rgba(255,77,77,.25);">
         <div class="text-[14px] text-[var(--muted)] leading-relaxed">상품은 모든 문제 종료 후 <b class="text-[var(--ink)]">종합 순위</b>로 결정 · 1인 1개 · 퇴장 시 수령<br/><b style="color:#FFD27A;">설문 완료자</b>만 경품 대상</div>
       </div>
-      <button id="qrNext" class="v-btn mt-auto">다음 문제 기다리기</button>
+      <button id="qrNext" class="v-btn mt-auto">다시 대기하기</button>
     </div>
 
   </div>
@@ -481,13 +481,7 @@
     }
     quiz.answered[qid]=true;
     var res = r.data && r.data[0]; var correct = res && res.is_correct;
-    if(correct){
-      // 정답 → 바로 대기 화면으로 (다음 문제 기다리기 누른 것처럼)
-      toast('정답! 🎉 점수가 적립됐어요');
-      goWaiting('정답을 제출했어요. 다음 문제를 기다리는 중…');
-      return;
-    }
-    showQuizResult(false);
+    showQuizResult(correct);
   }
   async function showQuizResult(correct){
     if(quiz.tickTimer){ clearInterval(quiz.tickTimer); quiz.tickTimer=null; }

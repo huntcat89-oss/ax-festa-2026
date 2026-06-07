@@ -181,14 +181,22 @@
     <section id="people" class="sec">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-xl font-bold">참가자 명단</h2>
-        <button id="peopleReload" class="pill">↻ 새로고침</button>
+        <div class="flex items-center gap-2">
+          <input id="csvFile" type="file" accept=".csv,text/csv" style="display:none" />
+          <button id="csvBtn" class="btn">＋ 구글시트 명단 가져오기 (CSV)</button>
+          <button id="peopleReload" class="btn-ghost">↻ 새로고침</button>
+        </div>
       </div>
       <div class="h-card">
         <table><thead><tr><th>이름</th><th>회사</th><th>직책</th><th>이메일</th><th>핸드폰</th><th>설문</th></tr></thead>
           <tbody id="peopleRows"><tr><td colspan="6" class="text-[var(--muted)]">불러오는 중…</td></tr></tbody>
         </table>
       </div>
-      <p class="text-[14px] text-[var(--muted)] mt-3">※ 명단은 구글시트 동기화로 채웁니다(다음 단계). 지금은 DB에 직접 추가된 인원이 표시됩니다.</p>
+      <p class="text-[14px] text-[var(--muted)] mt-3">
+        ※ 구글시트에서 <b>파일 → 다운로드 → CSV</b>로 받은 뒤 위 버튼으로 업로드하면 명단이 갱신됩니다.
+        시트 첫 줄(헤더)에 <b>이름 · 회사명 · 직책 · 이메일 · 핸드폰</b> 이 있으면 자동 인식해요(순서 무관).
+        이미 있는 이메일은 정보만 갱신되고 설문·참여 기록은 유지됩니다.
+      </p>
     </section>
 
   </main>
@@ -460,6 +468,50 @@
     }).join('') : '<tr><td colspan="6" class="text-[var(--muted)]">등록된 참가자가 없습니다.</td></tr>';
   }
   el('peopleReload').addEventListener('click', loadPeople);
+
+  // ── CSV(구글시트) 명단 가져오기 ──
+  function parseCSV(text){
+    var rows=[], row=[], cur='', inQ=false, i, c;
+    text=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+    for(i=0;i<text.length;i++){ c=text[i];
+      if(inQ){ if(c==='"'){ if(text[i+1]==='"'){cur+='"';i++;} else inQ=false; } else cur+=c; }
+      else { if(c==='"') inQ=true; else if(c===','){ row.push(cur); cur=''; }
+             else if(c==='\n'){ row.push(cur); rows.push(row); row=[]; cur=''; } else cur+=c; }
+    }
+    if(cur!==''||row.length){ row.push(cur); rows.push(row); }
+    return rows.filter(function(r){ return r.some(function(x){return (x||'').trim()!=='';}); });
+  }
+  function mapHeaders(hdr){
+    var idx={email:-1,name:-1,company:-1,title:-1,phone:-1};
+    hdr.forEach(function(h,i){ var s=(h||'').trim().toLowerCase().replace(/\s/g,'');
+      if(idx.email<0 && /(이메일|email|메일|e-mail)/.test(s)) idx.email=i;
+      else if(idx.name<0 && /(이름|성명|name)/.test(s)) idx.name=i;
+      else if(idx.company<0 && /(회사|소속|기관|company)/.test(s)) idx.company=i;
+      else if(idx.title<0 && /(직책|직급|직위|title|position)/.test(s)) idx.title=i;
+      else if(idx.phone<0 && /(핸드폰|휴대폰|휴대전화|전화|연락처|phone|mobile|hp)/.test(s)) idx.phone=i;
+    });
+    return idx;
+  }
+  el('csvBtn').addEventListener('click', function(){ el('csvFile').click(); });
+  el('csvFile').addEventListener('change', async function(){
+    var f=this.files && this.files[0]; if(!f){ return; }
+    var text=await f.text(); this.value='';
+    var rows=parseCSV(text);
+    if(rows.length<2){ toast('데이터가 없어요 (헤더 + 1행 이상 필요)'); return; }
+    var idx=mapHeaders(rows[0]);
+    if(idx.email<0){ toast('이메일 열을 못 찾았어요. 헤더에 "이메일"이 있는지 확인하세요.'); return; }
+    var items=[];
+    for(var r=1;r<rows.length;r++){ var row=rows[r];
+      var g=function(k){ return idx[k]>=0?(row[idx[k]]||'').trim():''; };
+      var email=g('email'); if(!email) continue;
+      items.push({email:email, name:g('name'), company:g('company'), title:g('title'), phone:g('phone')});
+    }
+    if(!items.length){ toast('가져올 행이 없어요'); return; }
+    if(!confirm(items.length+'명을 명단에 추가/갱신할까요?')) return;
+    var rr=await rpc('admin_import_participants', { p_rows: items });
+    if(rr.error){ toast('가져오기 오류: '+rr.error.message); return; }
+    toast(rr.data+'명 동기화 완료'); loadPeople();
+  });
 
   // ── 자동 로그인(세션) ──
   (function(){ try{ var s=sessionStorage.getItem('axpw'); if(s){ el('pw').value=s; doLogin(); } }catch(_){} })();
