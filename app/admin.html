@@ -182,39 +182,16 @@
     <section id="people" class="sec">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-xl font-bold">참가자 명단</h2>
-        <div class="flex items-center gap-2">
-          <button id="sheetCfgBtn" class="btn-ghost">⚙ 구글시트 설정</button>
-          <button id="sheetSyncBtn" class="btn">⟳ 구글시트 동기화</button>
-          <button id="peopleReload" class="btn-ghost">↻ 새로고침</button>
-        </div>
+        <button id="peopleReload" class="btn-ghost">↻ 새로고침</button>
       </div>
-
-      <!-- 구글시트 연동 설정 (이 브라우저에 저장) -->
-      <div id="sheetCfg" class="h-card mb-4" style="display:none;">
-        <div class="label mb-2">구글시트 연동 설정 (이 브라우저에만 저장됩니다)</div>
-        <div class="grid grid-cols-3 gap-3">
-          <div><div class="text-[14px] text-[var(--muted)] mb-1">스프레드시트 ID</div>
-            <input id="sheetId" class="inp w-full" placeholder="시트 URL의 /d/ 와 /edit 사이 문자열" /></div>
-          <div><div class="text-[14px] text-[var(--muted)] mb-1">범위(Range)</div>
-            <input id="sheetRange" class="inp w-full" placeholder="예: 시트1!A:E (기본 A:E)" /></div>
-          <div><div class="text-[14px] text-[var(--muted)] mb-1">Google API Key</div>
-            <input id="sheetKey" class="inp w-full" placeholder="AIza..." /></div>
-        </div>
-        <button id="sheetCfgSave" class="btn mt-3">설정 저장</button>
-        <div class="text-[14px] text-[var(--muted)] mt-2 leading-relaxed">
-          준비: ① 구글시트를 <b>"링크가 있는 모든 사용자 — 뷰어"</b>로 공유 ② Google Cloud에서 <b>Sheets API 사용 설정</b> + <b>API 키</b> 생성(가능하면 이 사이트 도메인으로 제한).
-          시트 첫 줄 헤더에 <b>이름·회사명·직책·이메일·핸드폰</b> 이 있으면 순서 무관 자동 인식.
-        </div>
-      </div>
-
       <div class="h-card">
         <table><thead><tr><th>이름</th><th>회사</th><th>직책</th><th>이메일</th><th>핸드폰</th><th>설문</th></tr></thead>
           <tbody id="peopleRows"><tr><td colspan="6" class="text-[var(--muted)]">불러오는 중…</td></tr></tbody>
         </table>
       </div>
       <p class="text-[14px] text-[var(--muted)] mt-3">
-        ※ <b>구글시트 동기화</b> 버튼을 누르면 시트 최신 명단을 API로 읽어 참가자 명단을 갱신합니다.
-        이미 있는 이메일은 정보만 갱신되고 설문·참여 기록은 유지됩니다.
+        ※ 명단 동기화는 <b>구글시트의 상단 메뉴 [Supabase 동기화 → 지금 동기화]</b>에서 합니다.
+        시트에서 명단을 수정한 뒤 그 메뉴를 누르면 이 목록이 갱신돼요. (여기 [새로고침]으로 최신 반영 확인)
       </p>
     </section>
 
@@ -505,53 +482,6 @@
     }).join('') : '<tr><td colspan="6" class="text-[var(--muted)]">등록된 참가자가 없습니다.</td></tr>';
   }
   el('peopleReload').addEventListener('click', loadPeople);
-
-  // ── 구글시트 API 동기화 ──
-  function mapHeaders(hdr){
-    var idx={email:-1,name:-1,company:-1,title:-1,phone:-1};
-    (hdr||[]).forEach(function(h,i){ var s=(h||'').trim().toLowerCase().replace(/\s/g,'');
-      if(idx.email<0 && /(이메일|email|메일|e-mail)/.test(s)) idx.email=i;
-      else if(idx.name<0 && /(이름|성명|name)/.test(s)) idx.name=i;
-      else if(idx.company<0 && /(회사|소속|기관|company)/.test(s)) idx.company=i;
-      else if(idx.title<0 && /(직책|직급|직위|title|position)/.test(s)) idx.title=i;
-      else if(idx.phone<0 && /(핸드폰|휴대폰|휴대전화|전화|연락처|phone|mobile|hp)/.test(s)) idx.phone=i;
-    });
-    return idx;
-  }
-  function sheetCfg(){ try{ return JSON.parse(localStorage.getItem('axsheet')||'{}'); }catch(_){ return {}; } }
-  function loadSheetCfg(){ var c=sheetCfg(); el('sheetId').value=c.id||''; el('sheetRange').value=c.range||'A:E'; el('sheetKey').value=c.key||''; }
-  el('sheetCfgBtn').addEventListener('click', function(){ var b=el('sheetCfg'); b.style.display = b.style.display==='none'?'block':'none'; loadSheetCfg(); });
-  el('sheetCfgSave').addEventListener('click', function(){
-    var c={ id:el('sheetId').value.trim(), range:(el('sheetRange').value.trim()||'A:E'), key:el('sheetKey').value.trim() };
-    try{ localStorage.setItem('axsheet', JSON.stringify(c)); }catch(_){}
-    toast('설정 저장됨'); el('sheetCfg').style.display='none';
-  });
-  el('sheetSyncBtn').addEventListener('click', async function(){
-    var c=sheetCfg();
-    if(!c.id || !c.key){ toast('먼저 [구글시트 설정]에서 시트 ID와 API Key를 저장하세요.'); el('sheetCfg').style.display='block'; loadSheetCfg(); return; }
-    var btn=this; btn.disabled=true; btn.innerHTML='<span class="spin"></span> 동기화 중…';
-    try{
-      var url='https://sheets.googleapis.com/v4/spreadsheets/'+encodeURIComponent(c.id)
-              +'/values/'+encodeURIComponent(c.range||'A:E')+'?key='+encodeURIComponent(c.key);
-      var res=await fetch(url); var j=await res.json();
-      if(j.error){ toast('시트 오류: '+(j.error.message||'')); return; }
-      var values=j.values||[];
-      if(values.length<2){ toast('시트에 데이터가 없어요 (헤더+1행 이상)'); return; }
-      var idx=mapHeaders(values[0]);
-      if(idx.email<0){ toast('헤더에서 "이메일" 열을 못 찾았어요.'); return; }
-      var items=[];
-      for(var r=1;r<values.length;r++){ var row=values[r];
-        var g=function(k){ return idx[k]>=0?((row[idx[k]]||'')+'').trim():''; };
-        var email=g('email'); if(!email) continue;
-        items.push({email:email, name:g('name'), company:g('company'), title:g('title'), phone:g('phone')});
-      }
-      if(!items.length){ toast('가져올 행이 없어요'); return; }
-      var rr=await rpc('admin_import_participants', { p_rows: items });
-      if(rr.error){ toast('저장 오류: '+rr.error.message); return; }
-      toast(rr.data+'명 동기화 완료'); loadPeople();
-    } catch(e){ toast('동기화 실패: '+(e&&e.message||e)); }
-    finally{ btn.disabled=false; btn.textContent='⟳ 구글시트 동기화'; }
-  });
 
   // ── 자동 로그인(세션) ──
   (function(){ try{ var s=sessionStorage.getItem('axpw'); if(s){ el('pw').value=s; doLogin(); } }catch(_){} })();
