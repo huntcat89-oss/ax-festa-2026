@@ -11,7 +11,7 @@
     --ink:#F3F0FF; --ink-2:#E2DBFF; --muted:#A99FD0; --muted-2:#8079A8;
     --line:#2C2456; --bg:#0C0826; --surface:#15102E; --surface-2:#1B1540; }
   html,body{font-family:"Pretendard Variable",Pretendard,system-ui,sans-serif; margin:0;
-    background:#08061a; color:var(--ink); min-height:100vh; font-size:15px; line-height:1.5;}
+    background:#08061a; color:var(--ink); min-height:100vh; font-size:15px; line-height:1.5; overflow-x:hidden;}
   .wrap{min-height:100vh; display:flex; align-items:center; justify-content:center;}
   /* 최소 글씨 14px 보장 (모바일 가독성) */
   .phone{width:100%; max-width:440px; min-height:100vh; position:relative; background:
@@ -111,14 +111,26 @@
     font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:13px; letter-spacing:2px; font-weight:700;
     color:#FFB23E; text-shadow:0 0 6px rgba(255,178,62,.85);}
   @keyframes ledscroll{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
-  /* 타임테이블 바텀시트 */
-  .tt-backdrop{position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:70; display:none; align-items:flex-end; justify-content:center;}
+  /* 타임테이블 바텀시트 — 폰 프레임 내부에서 아래에서 올라옴 */
+  .tt-backdrop{position:absolute; inset:0; background:rgba(0,0,0,.5); z-index:40; display:none;
+    align-items:flex-end; justify-content:center; border-radius:inherit;}
   .tt-backdrop.on{display:flex;}
-  .tt-panel{width:100%; max-width:440px; max-height:84vh; overflow:auto; background:var(--surface);
+  .tt-panel{width:100%; max-height:86%; overflow:auto; background:var(--surface);
     border-radius:22px 22px 0 0; border:1px solid var(--line); border-bottom:0; padding:12px 20px 26px;
-    transform:translateY(100%); transition:transform .28s ease;}
+    transform:translateY(100%); transition:transform .3s ease;}
   .tt-backdrop.on .tt-panel{transform:translateY(0);}
   .tt-handle{width:44px; height:5px; border-radius:999px; background:var(--line); margin:2px auto 14px;}
+  .tt-row{display:flex; gap:11px; padding:9px 0; border-top:1px solid var(--line);}
+  .tt-t{flex:0 0 44px; font-weight:800; color:var(--violet-soft); font-size:13px; padding-top:1px;}
+  .tt-s{font-size:14px; color:var(--ink-2); line-height:1.45;}
+  .tt-s b{color:var(--ink);}
+  /* 라이브 퀴즈 시작 알림 배너 (홈/미션 중에 떠서 바로 입장) */
+  .livealert{position:fixed; top:14px; left:50%; transform:translateX(-50%); z-index:66; display:none;
+    width:calc(100% - 32px); max-width:412px; padding:14px 16px; border:0; border-radius:14px; cursor:pointer;
+    background:linear-gradient(135deg,#FF3D6E,#E608FF); color:#fff; font-weight:800; font-size:15px;
+    box-shadow:0 12px 30px -8px rgba(230,8,255,.65); animation:livealertpulse 1.2s ease-in-out infinite;}
+  .livealert.on{display:block;}
+  @keyframes livealertpulse{0%,100%{transform:translateX(-50%) scale(1);}50%{transform:translateX(-50%) scale(1.03);}}
 </style>
 </head>
 <body>
@@ -185,7 +197,7 @@
       </div>
       <div class="mt-5">
         <h1 class="text-[27px] font-extrabold leading-tight"><span id="homeNick" class="gtext">—</span> 님의<br/>오늘의 미션! 🎯</h1>
-        <p id="surveyState" class="text-[14px] text-[var(--muted)] mt-2">미션을 완료하고 선물을 받아가세요!</p>
+        <p class="text-[14px] text-[var(--muted)] mt-2">미션을 완료하고 선물을 받아가세요!</p>
       </div>
 
       <div class="mt-5 flex flex-col gap-3">
@@ -291,10 +303,6 @@
 
     <!-- 8) 퀴즈 문제 (Kahoot형 2×2) -->
     <div id="quizQ" class="screen">
-      <div class="flex items-center justify-between mt-2">
-        <span id="qNick" class="text-[16px] font-extrabold" style="color:var(--violet-soft);">🏷️ —</span>
-        <button id="qPrizeLink" class="text-[13px] font-bold" style="color:var(--violet-soft);" data-go="myprize">🎁 내 순위·경품 →</button>
-      </div>
       <div class="flex items-center justify-between text-[14px] mt-3">
         <span id="qSpeaker" class="font-semibold text-[var(--muted)]">1부 · Q1</span>
         <span id="qCount" class="font-extrabold" style="color:#FF4D8D;">1 / 8</span>
@@ -366,39 +374,50 @@
       <button id="boothBack" class="v-btn-ghost">← 홈으로</button>
     </div>
 
+    <!-- 타임테이블 바텀시트 (폰 내부에서 슬라이드업) -->
+    <div id="ttSheet" class="tt-backdrop">
+      <div class="tt-panel">
+        <div class="tt-handle"></div>
+        <div class="flex items-center justify-between">
+          <h2 class="text-[20px] font-extrabold">🗓️ AX Festa 타임테이블</h2>
+          <button id="ttClose" class="text-[14px] text-[var(--muted)] underline">닫기</button>
+        </div>
+        <p class="text-[14px] text-[var(--muted)] mt-1">2026. 6. 25 (목) · 여의도 · 그랜드볼룸</p>
+
+        <div class="card p-4 mt-4">
+          <div class="flex items-center gap-2 mb-1"><span class="chip-m">1부</span><span class="text-[14px] font-bold">09:00 ~ 12:30</span></div>
+          <div class="tt-row"><span class="tt-t">08:30</span><span class="tt-s">등록 · 웰컴 라운지</span></div>
+          <div class="tt-row"><span class="tt-t">09:00</span><span class="tt-s"><b>김대식 교수</b> (KAIST)<br/>AI 시대, 지속 성장할 기업인의 생존 전략</span></div>
+          <div class="tt-row"><span class="tt-t">09:30</span><span class="tt-s"><b>이학준 대표</b> (플로우)<br/>The Age of AX : 차세대 AI 협업 OS 로드맵</span></div>
+          <div class="tt-row"><span class="tt-t">10:00</span><span class="tt-s"><b>장아람 실장</b> (플로우)<br/>131개국으로 확장한 AX 콘텐츠 공장</span></div>
+          <div class="tt-row"><span class="tt-t">10:30</span><span class="tt-s"><b>산업별 AX 전략</b><br/>HS화성 허경무 · 한국가스공사 서성진 · 한국원자력연구원 김동현</span></div>
+          <div class="tt-row"><span class="tt-t">11:30</span><span class="tt-s"><b>신승용 팀장</b> (LG CNS)<br/>a:xink와 flow로 완성하는 실행 가능한 AX</span></div>
+          <div class="tt-row"><span class="tt-t">11:50</span><span class="tt-s"><b>송길영 작가</b><br/>시대예보 : 경량문명의 탄생</span></div>
+          <div class="tt-row"><span class="tt-t">12:20</span><span class="tt-s">🎁 행운권 추첨 · 경품</span></div>
+        </div>
+        <div class="card p-4 mt-3">
+          <div class="flex items-center gap-2 mb-1"><span class="chip-m">2부</span><span class="text-[14px] font-bold">14:00 ~ 18:00</span></div>
+          <div class="tt-row"><span class="tt-t">13:10</span><span class="tt-s">등록 · 웰컴 라운지</span></div>
+          <div class="tt-row"><span class="tt-t">14:00</span><span class="tt-s"><b>송길영 작가</b><br/>시대예보 : 경량문명의 탄생</span></div>
+          <div class="tt-row"><span class="tt-t">14:30</span><span class="tt-s"><b>이학준 대표</b> (플로우)<br/>The Age of AX</span></div>
+          <div class="tt-row"><span class="tt-t">15:00</span><span class="tt-s"><b>장아람 실장</b> (플로우)<br/>131개국 AX 콘텐츠 공장</span></div>
+          <div class="tt-row"><span class="tt-t">15:20</span><span class="tt-s"><b>최청아 대표</b><br/>'돈텐츠'로 90억 달성한 AX 스몰 비즈니스</span></div>
+          <div class="tt-row"><span class="tt-t">15:40</span><span class="tt-s"><b>스타트업·중소기업 AX 전략</b><br/>조코딩 · 빌더조쉬 · 손재권 · 송영범 · 이세원 등</span></div>
+          <div class="tt-row"><span class="tt-t">16:40</span><span class="tt-s"><b>전문가 패널</b> : AI 생존 전략<br/>정주헌 · 정혁신 등</span></div>
+          <div class="tt-row"><span class="tt-t">17:40</span><span class="tt-s">🎁 행운권 추첨 · 경품</span></div>
+        </div>
+
+        <p class="text-[13px] text-[var(--muted-2)] mt-3 text-center">시간·순서는 현장 사정에 따라 바뀔 수 있어요. 정확한 내용은 공식 페이지에서 확인하세요.</p>
+        <a href="https://flow.team/ko/ax-festa#timetable" target="_blank" rel="noopener" class="v-btn-ghost mt-3 text-center" style="display:block;">
+          공식 타임테이블 전체보기 ↗
+        </a>
+      </div>
+    </div>
+
   </div>
 </div>
 <div id="toast" class="toast"></div>
-
-<!-- 타임테이블 바텀시트 -->
-<div id="ttSheet" class="tt-backdrop">
-  <div class="tt-panel">
-    <div class="tt-handle"></div>
-    <div class="flex items-center justify-between">
-      <h2 class="text-[20px] font-extrabold">🗓️ AX Festa 타임테이블</h2>
-      <button id="ttClose" class="text-[14px] text-[var(--muted)] underline">닫기</button>
-    </div>
-    <p class="text-[14px] text-[var(--muted)] mt-1">2026. 6. 25 (목) · 여의도 · 그랜드볼룸</p>
-
-    <div class="card p-4 mt-4">
-      <div class="flex items-center gap-2"><span class="chip-m">1부</span><span class="text-[15px] font-bold">오전 9시 ~</span></div>
-      <div class="text-[14px] text-[var(--ink-2)] mt-2 leading-relaxed">
-        김대식 교수 · 이학준 대표 · 장아람 실장 · 허경무 책임 · 서성진 과장 · 신승용 팀장 · 김동현 기술원 · 송길영 작가
-      </div>
-    </div>
-    <div class="card p-4 mt-3">
-      <div class="flex items-center gap-2"><span class="chip-m">2부</span><span class="text-[15px] font-bold">오후 2시 ~</span></div>
-      <div class="text-[14px] text-[var(--ink-2)] mt-2 leading-relaxed">
-        송길영 작가 · 이학준 대표 · 조코딩 · 빌더조쉬 · 손재권 대표 · 최청아 대표 · 송영범 대표 · 이세원 변호사 · 정주헌 대표 · 정혁신 대표 · 장아람 실장
-      </div>
-    </div>
-
-    <p class="text-[13px] text-[var(--muted-2)] mt-3 text-center">정확한 시간·세부 순서는 공식 페이지에서 확인하세요.</p>
-    <a href="https://flow.team/ko/ax-festa#timetable" target="_blank" rel="noopener" class="v-btn-ghost mt-3 text-center" style="display:block;">
-      공식 타임테이블 전체보기 ↗
-    </a>
-  </div>
-</div>
+<button id="liveAlert" class="livealert">🔴 LIVE 퀴즈가 시작됐어요! 지금 입장하기 →</button>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/config.js?v=3"></script>
@@ -467,9 +486,7 @@
   function fillHome(p){
     profile = p;
     el('homeNick').textContent    = getNick() || p.name || p.email.split('@')[0];
-    el('surveyState').textContent = p.survey_done
-      ? '✓ 설문 완료! 발표 퀴즈쇼까지 끝까지 참여해야 경품을 받을 수 있어요'
-      : '미션을 완료하고 선물을 받아가세요!';
+    startLiveWatch();  // 홈 진입 시부터 라이브 퀴즈 시작 감지
   }
   async function init(){
     var saved = getEmail();
@@ -491,7 +508,26 @@
   el('emailInput').addEventListener('keydown', function(e){ if(e.key==='Enter') el('nickInputLogin').focus(); });
   el('nickInputLogin').addEventListener('keydown', function(e){ if(e.key==='Enter') el('enterBtn').click(); });
   el('blockedBack').addEventListener('click', function(){ clearEmail(); el('emailInput').value=''; show('login'); });
-  el('logoutBtn').addEventListener('click', function(){ stopPolling(); clearEmail(); clearNick(); el('emailInput').value=''; el('nickInputLogin').value=''; profile=null; show('login'); });
+  el('logoutBtn').addEventListener('click', function(){ stopPolling(); stopLiveWatch(); clearEmail(); clearNick(); el('emailInput').value=''; el('nickInputLogin').value=''; profile=null; show('login'); });
+
+  // ── 라이브 퀴즈 시작 감지 (홈/미션 중에도) ──
+  var liveWatchTimer=null;
+  function startLiveWatch(){ if(liveWatchTimer) return; checkLiveAlert(); liveWatchTimer=setInterval(checkLiveAlert, 4000); }
+  function stopLiveWatch(){ if(liveWatchTimer){ clearInterval(liveWatchTimer); liveWatchTimer=null; } el('liveAlert').classList.remove('on'); }
+  async function checkLiveAlert(){
+    if(!profile){ el('liveAlert').classList.remove('on'); return; }
+    var homeish = ['home','survey','booth','axresult','myprize'].some(function(s){ return el(s).classList.contains('on'); });
+    if(!homeish){ el('liveAlert').classList.remove('on'); return; }  // 이미 퀴즈 화면이면 알림 불필요
+    var part = profile.part ? profile.part : 1;
+    var r=await db.from('public_live_quiz').select('id').eq('part', part).limit(1);
+    if(r.error){ return; }
+    el('liveAlert').classList.toggle('on', !!(r.data && r.data.length));
+  }
+  el('liveAlert').addEventListener('click', function(){
+    el('liveAlert').classList.remove('on');
+    if(quiz.entered){ goWaiting('퀴즈에 입장합니다…'); }  // 이미 입장한 적 있으면 바로 대기 → 폴링이 현재 문항 표시
+    else { startQuizFlow(); }
+  });
 
   // ───────────── 설문 ─────────────
   // 키 = HubSpot 인터널네임, 값 = HubSpot 옵션값과 동일 (제출 시 그대로 전송)
@@ -590,7 +626,6 @@
     if(r.error){ toast('저장 오류: '+r.error.message); return; }
     if(profile) profile.survey_done=true;
     hubspotSubmit({ email:getEmail(), name:(profile&&profile.name)||'', company:(profile&&profile.company)||'', ax_type:type, answers:svAns });
-    el('surveyState').textContent='✓ 설문 완료! 발표 퀴즈쇼까지 끝까지 참여해야 경품을 받을 수 있어요';
     var t=TYPE[type];
     el('axLetter').textContent=type; el('axName').textContent=t.name; el('axDesc').textContent=t.desc;
     el('axDesk').innerHTML='웰컴존에서 <b class="gtext">'+t.brochure+'</b>를 받아보세요.';
@@ -625,7 +660,7 @@
               : '입장 오류: '+r.error.message;
       m.textContent=msg; m.style.color='#FF6B6B'; m.style.display='block'; return;
     }
-    quiz.nick=nick;
+    quiz.nick=nick; quiz.entered=true;
     goWaiting('관리자가 시작을 누르면 한 문제씩 나타나요.');
   });
   el('quizEntryBack').addEventListener('click', function(){ show('home'); });
@@ -677,8 +712,6 @@
   function renderQuestion(q){
     var isLive = (q.status==='live');
     quiz.seenAny = true;  // 한 번이라도 문제가 떴으면 대기화면 문구를 '다음 문제 준비 중'으로
-    el('qNick').textContent = '🏷️ ' + (quiz.nick || '-');
-    el('qPrizeLink').style.display = isLive ? 'none' : 'inline-block';  // 정답받기 중엔 이탈 방지 위해 숨김
     el('qSpeaker').textContent = quiz.part + '부 · Q' + q.order_no + (q.speaker ? ' · '+q.speaker : '');
     el('qCount').textContent = q.order_no + ' / ' + PART_TOTAL[quiz.part];
     el('qQuestion').textContent = q.question;
