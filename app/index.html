@@ -70,6 +70,26 @@
   .livepulse .dot{width:34px; height:34px; border-radius:50%; background:#FF4D8D; box-shadow:0 0 26px #FF4D8D; animation:livedot 1.4s ease-in-out infinite;}
   @keyframes livering{0%{width:44px;height:44px;opacity:.75;} 100%{width:160px;height:160px;opacity:0;}}
   @keyframes livedot{0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(.78);opacity:.65;}}
+  /* 선물 팡팡 (로그인) */
+  .giftwrap{position:relative; width:200px; height:200px; margin:0 auto;}
+  .giftbox{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); font-size:96px; line-height:1;
+    filter:drop-shadow(0 12px 26px rgba(230,8,255,.55)); animation:giftshake 1.5s ease-in-out infinite; z-index:2;}
+  @keyframes giftshake{0%,100%{transform:translate(-50%,-50%) rotate(0) scale(1);}
+    14%{transform:translate(-50%,-50%) rotate(-9deg) scale(1.06);}
+    28%{transform:translate(-50%,-50%) rotate(9deg) scale(1.1);}
+    42%{transform:translate(-50%,-50%) rotate(-7deg) scale(1.06);}
+    56%{transform:translate(-50%,-50%) rotate(5deg) scale(1.03);}
+    70%{transform:translate(-50%,-50%) rotate(-3deg) scale(1.01);}}
+  .pop{position:absolute; left:50%; top:50%; font-size:30px; opacity:0; will-change:transform,opacity;
+    animation:popout 1.8s ease-out infinite;}
+  @keyframes popout{0%{transform:translate(-50%,-50%) scale(.2); opacity:0;}
+    18%{opacity:1;} 100%{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1.1) rotate(var(--rot)); opacity:0;}}
+  /* 미션 버튼 (홈) — 높이 크게 */
+  .mission-btn{width:100%; display:flex; align-items:center; gap:14px; padding:20px 16px; border-radius:20px; text-align:left;
+    min-height:92px; background:rgba(255,255,255,.04); border:1px solid var(--line); color:var(--ink); cursor:pointer;
+    transition:transform .1s, background .15s;}
+  .mission-btn:hover{background:rgba(139,43,255,.12);} .mission-btn:active{transform:scale(.985);}
+  .mission-btn .ico{width:54px; height:54px; border-radius:15px; font-size:26px;}
 </style>
 </head>
 <body>
@@ -82,20 +102,36 @@
       <div class="text-[14px] text-[var(--muted)] mt-4">불러오는 중…</div>
     </div>
 
-    <!-- 1) 이메일 입력 -->
+    <!-- 1) 이메일 + 닉네임 입력 -->
     <div id="login" class="screen">
-      <div class="mt-8 text-center">
-        <h1 class="text-[30px] font-extrabold leading-none">AX Festa <span style="color:#FF4D8D;">Live</span></h1>
-        <p class="text-[14px] text-[var(--muted)] mt-3">AI가 일하는 시대, 우리의 변화는 지금 시작됩니다.</p>
+      <div class="mt-6 text-center">
+        <div class="inline-flex items-center gap-2 text-[13px] font-bold tracking-widest" style="color:#FF4D8D;">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#FF4D8D;box-shadow:0 0 10px #FF4D8D;"></span> AX FESTA LIVE
+        </div>
+        <div class="giftwrap mt-2">
+          <span class="pop" style="--dx:-78px;--dy:-58px;--rot:-25deg;animation-delay:0s;">🎉</span>
+          <span class="pop" style="--dx:80px;--dy:-50px;--rot:20deg;animation-delay:.25s;">🎁</span>
+          <span class="pop" style="--dx:-86px;--dy:42px;--rot:18deg;animation-delay:.5s;">✨</span>
+          <span class="pop" style="--dx:84px;--dy:54px;--rot:-18deg;animation-delay:.75s;">🎊</span>
+          <span class="pop" style="--dx:0px;--dy:-92px;--rot:0deg;animation-delay:.9s;">⭐</span>
+          <span class="pop" style="--dx:-30px;--dy:80px;--rot:-12deg;animation-delay:1.15s;">🎈</span>
+          <span class="pop" style="--dx:40px;--dy:82px;--rot:12deg;animation-delay:1.35s;">💜</span>
+          <span class="giftbox">🎁</span>
+        </div>
+        <h1 class="mt-3 text-[28px] font-black leading-tight">참가만 해도<br/><span class="gtext">선물을 드려요!</span></h1>
+        <p class="text-[14px] text-[var(--muted)] mt-2">이메일 + 닉네임만 입력하면 바로 시작!</p>
       </div>
-      <div class="mt-8">
+      <div class="mt-5">
         <div class="text-[14px] font-bold mb-2">이메일 <span style="color:#FF4D8D;">*</span>
           <span class="text-[14px] text-[var(--muted-2)] font-normal ml-1">사전 등록 명단만 참여 가능</span></div>
         <input id="emailInput" class="inp" type="email" inputmode="email" placeholder="you@company.com" autocomplete="email" />
+        <div class="text-[14px] font-bold mb-2 mt-3">닉네임 <span style="color:#FF4D8D;">*</span>
+          <span class="text-[14px] text-[var(--muted-2)] font-normal ml-1">순위판에 표시돼요 (2~10자)</span></div>
+        <input id="nickInputLogin" class="inp" type="text" maxlength="10" placeholder="닉네임 입력" />
         <div id="loginMsg" class="text-[14px] mt-2" style="display:none;"></div>
-        <button id="enterBtn" class="v-btn mt-3">참여하기</button>
+        <button id="enterBtn" class="v-btn mt-3">🎁 참여하고 선물받기</button>
       </div>
-      <div class="mt-auto pt-6 text-center text-[14px] text-[var(--muted-2)] leading-relaxed">
+      <div class="mt-auto pt-5 text-center text-[14px] text-[var(--muted-2)] leading-relaxed">
         <p>행사에 참여하여 경품에 응모하신 경우, <a href="https://support.flow.team/ko/flow/privacy_marketing" target="_blank" rel="noopener" style="text-decoration:underline; color:var(--violet-soft);">마케팅 정보 수신</a>에 동의하신 것으로 간주합니다.</p>
       </div>
     </div>
@@ -111,48 +147,41 @@
 
     <!-- 3) 홈 -->
     <div id="home" class="screen">
-      <div class="flex items-center justify-end text-[14px] text-[var(--muted-2)]">
-        <button id="logoutBtn" class="text-[var(--muted)] underline">로그아웃</button>
+      <div class="flex items-center justify-between">
+        <span class="text-[13px] font-bold tracking-wide" style="color:var(--violet-soft);">🏠 AX Festa 라이브 홈</span>
+        <button id="logoutBtn" class="text-[13px] text-[var(--muted)] underline">로그아웃</button>
       </div>
-      <div class="mt-4">
-        <h1 class="text-[28px] font-extrabold leading-none text-center">AX Festa <span style="color:#FF4D8D;">Live</span></h1>
-        <div class="mt-3 card p-4">
-          <div class="text-[14px] text-[var(--muted-2)] font-bold tracking-wide">참가자</div>
-          <div id="homeName" class="text-[17px] font-bold mt-0.5">—</div>
-          <div id="homeCompany" class="text-[14px] text-[var(--muted)]">—</div>
-          <div id="homeEmail" class="text-[14px] text-[var(--muted-2)] mt-0.5">—</div>
-        </div>
+      <div class="mt-5">
+        <h1 class="text-[27px] font-black leading-tight"><span id="homeNick" class="gtext">—</span> 님의<br/>오늘의 미션! 🎯</h1>
+        <p id="surveyState" class="text-[14px] text-[var(--muted)] mt-2">미션을 완료하고 선물을 받아가세요!</p>
       </div>
 
-      <div class="mt-4 flex flex-col gap-2.5">
-        <button class="menu-btn" data-go="survey">
-          <span class="ico" style="background:rgba(99,102,241,.22);">👀</span>
-          <span class="flex-1"><span class="block text-[16px] font-bold">나의 AX 유형</span>
-            <span id="surveyState" class="block text-[14px] text-[var(--muted)] mt-0.5">설문으로 내 AX 유형을 확인해보세요!</span></span>
-          <span class="text-[var(--muted-2)] text-[17px]">→</span>
+      <div class="mt-5 flex flex-col gap-3">
+        <button class="mission-btn" data-go="survey">
+          <span class="ico" style="background:rgba(99,102,241,.22);">📝</span>
+          <span class="flex-1"><span class="block text-[13px] font-bold" style="color:var(--violet-soft);">미션 1</span>
+            <span class="block text-[18px] font-extrabold mt-0.5">AX 설문조사</span>
+            <span class="block text-[14px] text-[var(--muted)] mt-0.5">설문하고 나의 AX 유형 + 선물 받기</span></span>
+          <span class="text-[var(--muted-2)] text-[18px]">→</span>
         </button>
-        <button class="menu-btn" data-go="booth">
+        <button class="mission-btn" data-go="booth">
           <span class="ico" style="background:rgba(20,184,166,.2);">🎪</span>
-          <span class="flex-1"><span class="block text-[16px] font-bold">부스 스탬프</span>
-            <span class="block text-[14px] text-[var(--muted)] mt-0.5">AX 체험 부스를 방문하고 인증하세요!</span></span>
-          <span class="text-[var(--muted-2)] text-[17px]">→</span>
+          <span class="flex-1"><span class="block text-[13px] font-bold" style="color:var(--violet-soft);">미션 2</span>
+            <span class="block text-[18px] font-extrabold mt-0.5">부스 도장깨기</span>
+            <span class="block text-[14px] text-[var(--muted)] mt-0.5">체험 부스를 방문하고 도장을 찍으세요!</span></span>
+          <span class="text-[var(--muted-2)] text-[18px]">→</span>
         </button>
-        <button class="menu-btn" data-go="quiz">
+        <button class="mission-btn" data-go="quiz">
           <span class="ico" style="background:rgba(139,43,255,.2);">🏆</span>
-          <span class="flex-1"><span class="block text-[16px] font-bold">퀴즈 참여</span>
-            <span class="block text-[14px] text-[var(--muted)] mt-0.5">발표 내용 퀴즈! 종합 순위로 경품을 노려보세요</span></span>
-          <span class="text-[var(--muted-2)] text-[17px]">→</span>
-        </button>
-        <button class="menu-btn" data-go="myprize">
-          <span class="ico" style="background:rgba(245,180,0,.2);">🎁</span>
-          <span class="flex-1"><span class="block text-[16px] font-bold">내 경품 · 순위</span>
-            <span class="block text-[14px] text-[var(--muted)] mt-0.5">내 종합 순위와 받을 경품을 확인하세요</span></span>
-          <span class="text-[var(--muted-2)] text-[17px]">→</span>
+          <span class="flex-1"><span class="block text-[13px] font-bold" style="color:var(--violet-soft);">미션 3</span>
+            <span class="block text-[18px] font-extrabold mt-0.5">발표 퀴즈 랭킹쇼</span>
+            <span class="block text-[14px] text-[var(--muted)] mt-0.5">실시간 퀴즈로 순위에 도전하고 경품 받기!</span></span>
+          <span class="text-[var(--muted-2)] text-[18px]">→</span>
         </button>
       </div>
 
       <a href="https://flow.team/ko/ax-festa#timetable" target="_blank" rel="noopener"
-         class="menu-btn mt-2.5 justify-center text-[15px] font-bold" style="gap:8px;">
+         class="mission-btn mt-3 justify-center text-[15px] font-bold" style="gap:8px; min-height:64px;">
         🗓️ 타임테이블 확인하기 <span class="text-[var(--muted-2)] text-[14px]">↗</span>
       </a>
 
@@ -187,7 +216,10 @@
 
     <!-- 6) 퀴즈 입장 (부 선택 + 닉네임) -->
     <div id="quizentry" class="screen">
-      <div class="mt-6"><span class="chip-m">QUIZ ENTRY</span></div>
+      <div class="flex items-center justify-between mt-2">
+        <span class="chip-m">QUIZ ENTRY</span>
+        <button class="text-[13px] font-bold" style="color:var(--violet-soft);" data-go="myprize">🎁 내 순위·경품 →</button>
+      </div>
       <h1 class="mt-3 text-[22px] font-extrabold leading-tight">순위판에 표시될<br/><span class="gtext">닉네임을 정해주세요.</span></h1>
       <p class="text-[14px] text-[var(--muted)] mt-2">순위판엔 닉네임 + 회사명이 함께 표시돼요</p>
 
@@ -207,6 +239,9 @@
 
     <!-- 7) 퀴즈 대기 -->
     <div id="quizwait" class="screen">
+      <div class="flex items-center justify-end mt-2">
+        <button class="text-[13px] font-bold" style="color:var(--violet-soft);" data-go="myprize">🎁 내 순위·경품 →</button>
+      </div>
       <div class="flex-1 flex flex-col items-center justify-center text-center">
         <div class="inline-flex items-center gap-2 text-[15px] font-bold tracking-widest" style="color:#FF4D8D;">
           <span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#FF4D8D;box-shadow:0 0 10px #FF4D8D;animation:livedot 1.4s ease-in-out infinite;"></span> LIVE STAND-BY
@@ -322,6 +357,11 @@
   function saveEmail(e){ _email=e; try{ localStorage.setItem(KEY,e); }catch(_){} }
   function getEmail(){ if(_email) return _email; try{ _email=localStorage.getItem(KEY)||''; }catch(_){ _email=''; } return _email; }
   function clearEmail(){ _email=''; try{ localStorage.removeItem(KEY); }catch(_){} }
+  // 닉네임도 첫 화면에서 입력 → 메모리 우선 보관 (인사말/퀴즈 입장에 재사용)
+  var NICK_KEY='axNick', _nick='';
+  function saveNick(n){ _nick=n; try{ localStorage.setItem(NICK_KEY,n); }catch(_){} }
+  function getNick(){ if(_nick) return _nick; try{ _nick=localStorage.getItem(NICK_KEY)||''; }catch(_){ _nick=''; } return _nick; }
+  function clearNick(){ _nick=''; try{ localStorage.removeItem(NICK_KEY); }catch(_){} }
   var profile = null;
 
   // ── HubSpot 폼 제출 (AX 설문 완료 시) ──
@@ -361,11 +401,9 @@
   }
   function fillHome(p){
     profile = p;
-    el('homeName').textContent    = p.name || p.email.split('@')[0];
-    el('homeCompany').textContent = p.company || '회사명 미등록';
-    el('homeEmail').textContent   = p.email;
+    el('homeNick').textContent    = getNick() || p.name || p.email.split('@')[0];
     el('surveyState').textContent = p.survey_done
-      ? '✓ 설문 완료 — 경품 수령 자격 있음' : '아직 미완료 · 경품 받으려면 설문 필요';
+      ? '✓ 설문 완료 — 경품 수령 자격 있어요!' : '미션을 완료하고 선물을 받아가세요!';
   }
   async function init(){
     var saved = getEmail();
@@ -374,17 +412,20 @@
   }
   el('enterBtn').addEventListener('click', async function(){
     var email = el('emailInput').value.trim().toLowerCase();
+    var nick = el('nickInputLogin').value.trim();
     if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ lmsg('올바른 이메일을 입력하세요.'); return; }
+    if(nick.length<2 || nick.length>10){ lmsg('닉네임은 2~10자로 입력하세요.'); return; }
     var btn=this; btn.disabled=true; btn.innerHTML='<span class="spin"></span> 확인 중…';
     var p = await check(email);
-    btn.disabled=false; btn.textContent='참여하기';
+    btn.disabled=false; btn.textContent='🎁 참여하고 선물받기';
     if(p === undefined) return;
     if(!p){ show('blocked'); return; }
-    saveEmail(email); fillHome(p); show('home');
+    saveEmail(email); saveNick(nick); fillHome(p); show('home');
   });
-  el('emailInput').addEventListener('keydown', function(e){ if(e.key==='Enter') el('enterBtn').click(); });
+  el('emailInput').addEventListener('keydown', function(e){ if(e.key==='Enter') el('nickInputLogin').focus(); });
+  el('nickInputLogin').addEventListener('keydown', function(e){ if(e.key==='Enter') el('enterBtn').click(); });
   el('blockedBack').addEventListener('click', function(){ clearEmail(); el('emailInput').value=''; show('login'); });
-  el('logoutBtn').addEventListener('click', function(){ stopPolling(); clearEmail(); el('emailInput').value=''; profile=null; show('login'); });
+  el('logoutBtn').addEventListener('click', function(){ stopPolling(); clearEmail(); clearNick(); el('emailInput').value=''; el('nickInputLogin').value=''; profile=null; show('login'); });
 
   // ───────────── 설문 ─────────────
   // 키 = HubSpot 인터널네임, 값 = HubSpot 옵션값과 동일 (제출 시 그대로 전송)
@@ -476,6 +517,7 @@
 
   function startQuizFlow(){
     quiz.part = (profile && profile.part) ? profile.part : 1;  // 명단(시트)에서 배정된 부
+    quiz.nick = quiz.nick || getNick();  // 첫 화면에서 정한 닉네임 재사용
     el('qPartLabel').textContent = quiz.part + '부 · 총 ' + PART_TOTAL[quiz.part] + '문제';
     el('nickInput').value=quiz.nick||''; el('nickMsg').style.display='none'; show('quizentry');
   }
