@@ -898,8 +898,8 @@
       b.classList.toggle('open', open);
       b.setAttribute('aria-expanded', open ? 'true' : 'false');
       if(open){
-        // 펼친 뒤 보이도록 살짝 스크롤
-        setTimeout(function(){ b.scrollIntoView({behavior:'smooth', block:'nearest'}); }, 320);
+        // 펼친 뒤 버튼이 화면 위로 올라가도록 스크롤
+        setTimeout(function(){ b.scrollIntoView({behavior:'smooth', block:'start'}); }, 320);
       }
     });
   })();
