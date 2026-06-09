@@ -49,6 +49,10 @@
     color:var(--ink); min-height:54px; line-height:1.25; cursor:pointer;}
   .optmini.sel{border-color:var(--violet); box-shadow:0 0 0 1px var(--violet);
     background:linear-gradient(135deg, rgba(139,43,255,.28), rgba(27,21,64,.6));}
+  .cbx{width:21px; height:21px; border-radius:6px; border:2px solid var(--violet); flex-shrink:0;
+    display:inline-flex; align-items:center; justify-content:center; background:rgba(255,255,255,.04);}
+  .cbx.on{background:var(--violet); border-color:var(--violet);}
+  .cbx.on::after{content:'✓'; color:#fff; font-size:13px; font-weight:800; line-height:1;}
   .bar{height:7px; background:#241D49; border-radius:999px; overflow:hidden;}
   .bar>span{display:block; height:100%; background:linear-gradient(90deg,#8B2BFF,#E608FF);}
   .tile{border-radius:18px; padding:16px 12px; display:flex; flex-direction:column; align-items:center; justify-content:center;
@@ -56,7 +60,7 @@
   .tile:active{transform:scale(.97);} .tile:hover{filter:brightness(1.08);}
   .tile:disabled{opacity:.55; cursor:not-allowed;}
   .tnum{width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,.25); display:flex; align-items:center;
-    justify-content:center; font-size:21px; font-weight:900; line-height:1;}
+    justify-content:center; font-size:21px; font-weight:800; line-height:1;}
   .toast{position:fixed; left:50%; bottom:32px; transform:translateX(-50%); background:#1B1540; color:#fff;
     padding:13px 18px; border-radius:12px; font-size:14px; border:1px solid var(--violet); box-shadow:0 10px 30px -10px #000;
     opacity:0; transition:opacity .2s; pointer-events:none; z-index:50; max-width:88%; text-align:center;}
@@ -84,17 +88,45 @@
     animation:popout 1.8s ease-out infinite;}
   @keyframes popout{0%{transform:translate(-50%,-50%) scale(.2); opacity:0;}
     18%{opacity:1;} 100%{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1.1) rotate(var(--rot)); opacity:0;}}
+  /* 정답 폭죽 / 오답 흔들림 */
+  .confetti-piece{position:fixed; top:-14px; width:10px; height:14px; border-radius:2px; z-index:60; opacity:.95;
+    will-change:transform; animation-name:conffall; animation-timing-function:linear; animation-fill-mode:forwards;}
+  @keyframes conffall{ to{ transform:translateY(108vh) rotate(720deg); } }
+  @keyframes shakeX{ 0%,100%{transform:translateX(0);} 15%{transform:translateX(-10px);} 30%{transform:translateX(9px);}
+    45%{transform:translateX(-8px);} 60%{transform:translateX(7px);} 75%{transform:translateX(-5px);} 90%{transform:translateX(3px);} }
+  .shake{ animation:shakeX .55s ease-in-out; }
   /* 미션 버튼 (홈) — 높이 크게 */
-  .mission-btn{width:100%; display:flex; align-items:center; gap:14px; padding:20px 16px; border-radius:20px; text-align:left;
-    min-height:92px; background:rgba(255,255,255,.04); border:1px solid var(--line); color:var(--ink); cursor:pointer;
+  .mission-btn{width:100%; display:flex; align-items:center; gap:14px; padding:22px 16px; border-radius:20px; text-align:left;
+    min-height:108px; background:rgba(255,255,255,.04); border:1px solid var(--line); color:var(--ink); cursor:pointer;
     transition:transform .1s, background .15s;}
   .mission-btn:hover{background:rgba(139,43,255,.12);} .mission-btn:active{transform:scale(.985);}
   .mission-btn .ico{width:54px; height:54px; border-radius:15px; font-size:26px;}
+  /* LED 전광판 (도트 매트릭스 느낌 · 얇고 느리게) */
+  .ledbar{position:relative; height:28px; margin:-12px -20px 12px; overflow:hidden; display:flex; align-items:center;
+    background:#070310; background-image:radial-gradient(rgba(255,255,255,.06) 0.6px, transparent 0.7px);
+    background-size:3px 3px; border-bottom:1px solid #2a1450;
+    -webkit-mask-image:linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+            mask-image:linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);}
+  .ledtrack{display:inline-block; white-space:nowrap; will-change:transform; animation:ledscroll 26s linear infinite;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:13px; letter-spacing:2px; font-weight:700;
+    color:#FFB23E; text-shadow:0 0 6px rgba(255,178,62,.85);}
+  @keyframes ledscroll{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
+  /* 타임테이블 바텀시트 */
+  .tt-backdrop{position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:70; display:none; align-items:flex-end; justify-content:center;}
+  .tt-backdrop.on{display:flex;}
+  .tt-panel{width:100%; max-width:440px; max-height:84vh; overflow:auto; background:var(--surface);
+    border-radius:22px 22px 0 0; border:1px solid var(--line); border-bottom:0; padding:12px 20px 26px;
+    transform:translateY(100%); transition:transform .28s ease;}
+  .tt-backdrop.on .tt-panel{transform:translateY(0);}
+  .tt-handle{width:44px; height:5px; border-radius:999px; background:var(--line); margin:2px auto 14px;}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="phone">
+
+    <!-- LED 전광판 -->
+    <div class="ledbar"><div class="ledtrack" id="ledtrack"></div></div>
 
     <!-- 로딩 -->
     <div id="loading" class="screen on items-center justify-center text-center">
@@ -118,7 +150,7 @@
           <span class="pop" style="--dx:40px;--dy:82px;--rot:12deg;animation-delay:1.35s;">💜</span>
           <span class="giftbox">🎁</span>
         </div>
-        <h1 class="mt-3 text-[28px] font-black leading-tight">참가만 해도<br/><span class="gtext">선물을 드려요!</span></h1>
+        <h1 class="mt-3 text-[28px] font-extrabold leading-tight">퀴즈에 참가만 해도<br/><span class="gtext">선물을 드려요!</span></h1>
         <p class="text-[14px] text-[var(--muted)] mt-2">이메일 + 닉네임만 입력하면 바로 시작!</p>
       </div>
       <div class="mt-5">
@@ -129,10 +161,10 @@
           <span class="text-[14px] text-[var(--muted-2)] font-normal ml-1">순위판에 표시돼요 (2~10자)</span></div>
         <input id="nickInputLogin" class="inp" type="text" maxlength="10" placeholder="닉네임 입력" />
         <div id="loginMsg" class="text-[14px] mt-2" style="display:none;"></div>
-        <button id="enterBtn" class="v-btn mt-3">🎁 참여하고 선물받기</button>
+        <button id="enterBtn" class="v-btn mt-3">🎁 참가하고 선물받기</button>
       </div>
       <div class="mt-auto pt-5 text-center text-[14px] text-[var(--muted-2)] leading-relaxed">
-        <p>행사에 참여하여 경품에 응모하신 경우, <a href="https://support.flow.team/ko/flow/privacy_marketing" target="_blank" rel="noopener" style="text-decoration:underline; color:var(--violet-soft);">마케팅 정보 수신</a>에 동의하신 것으로 간주합니다.</p>
+        <p>행사에 참여하여 경품에 응모하신 경우,<br/><a href="https://support.flow.team/ko/flow/privacy_marketing" target="_blank" rel="noopener" style="text-decoration:underline; color:var(--violet-soft);">마케팅 정보 수신</a>에 동의하신 것으로 간주합니다.</p>
       </div>
     </div>
 
@@ -152,7 +184,7 @@
         <button id="logoutBtn" class="text-[13px] text-[var(--muted)] underline">로그아웃</button>
       </div>
       <div class="mt-5">
-        <h1 class="text-[27px] font-black leading-tight"><span id="homeNick" class="gtext">—</span> 님의<br/>오늘의 미션! 🎯</h1>
+        <h1 class="text-[27px] font-extrabold leading-tight"><span id="homeNick" class="gtext">—</span> 님의<br/>오늘의 미션! 🎯</h1>
         <p id="surveyState" class="text-[14px] text-[var(--muted)] mt-2">미션을 완료하고 선물을 받아가세요!</p>
       </div>
 
@@ -160,30 +192,29 @@
         <button class="mission-btn" data-go="survey">
           <span class="ico" style="background:rgba(99,102,241,.22);">📝</span>
           <span class="flex-1"><span class="block text-[13px] font-bold" style="color:var(--violet-soft);">미션 1</span>
-            <span class="block text-[18px] font-extrabold mt-0.5">AX 설문조사</span>
-            <span class="block text-[14px] text-[var(--muted)] mt-0.5">설문하고 나의 AX 유형 + 선물 받기</span></span>
+            <span class="block text-[22px] font-extrabold mt-0.5">AX 유형 알아보기</span>
+            <span class="block text-[14px] text-[var(--muted)] mt-0.5">설문하고 나의 AX 유형 보기</span></span>
           <span class="text-[var(--muted-2)] text-[18px]">→</span>
         </button>
         <button class="mission-btn" data-go="booth">
           <span class="ico" style="background:rgba(20,184,166,.2);">🎪</span>
           <span class="flex-1"><span class="block text-[13px] font-bold" style="color:var(--violet-soft);">미션 2</span>
-            <span class="block text-[18px] font-extrabold mt-0.5">부스 도장깨기</span>
-            <span class="block text-[14px] text-[var(--muted)] mt-0.5">체험 부스를 방문하고 도장을 찍으세요!</span></span>
+            <span class="block text-[22px] font-extrabold mt-0.5">부스 도장깨기</span>
+            <span class="block text-[14px] text-[var(--muted)] mt-0.5">플로우 체험부스에서 도장을 찍으세요!</span></span>
           <span class="text-[var(--muted-2)] text-[18px]">→</span>
         </button>
         <button class="mission-btn" data-go="quiz">
           <span class="ico" style="background:rgba(139,43,255,.2);">🏆</span>
           <span class="flex-1"><span class="block text-[13px] font-bold" style="color:var(--violet-soft);">미션 3</span>
-            <span class="block text-[18px] font-extrabold mt-0.5">발표 퀴즈 랭킹쇼</span>
-            <span class="block text-[14px] text-[var(--muted)] mt-0.5">실시간 퀴즈로 순위에 도전하고 경품 받기!</span></span>
+            <span class="block text-[22px] font-extrabold mt-0.5">발표 퀴즈 랭킹쇼</span>
+            <span class="block text-[14px] text-[var(--muted)] mt-0.5">퀴즈로 1위에 도전하세요!<br/>🌰 참가자 전원에게 호두과자를 드려요!</span></span>
           <span class="text-[var(--muted-2)] text-[18px]">→</span>
         </button>
       </div>
 
-      <a href="https://flow.team/ko/ax-festa#timetable" target="_blank" rel="noopener"
-         class="mission-btn mt-3 justify-center text-[15px] font-bold" style="gap:8px; min-height:64px;">
-        🗓️ 타임테이블 확인하기 <span class="text-[var(--muted-2)] text-[14px]">↗</span>
-      </a>
+      <button id="timetableBtn" class="mission-btn mt-3 justify-center text-[15px] font-bold" style="gap:8px; min-height:64px;">
+        🗓️ 타임테이블 확인하기 <span class="text-[var(--muted-2)] text-[14px]">▾</span>
+      </button>
 
     </div>
 
@@ -203,15 +234,15 @@
     <!-- 5) 설문 결과(AX 유형) -->
     <div id="axresult" class="screen items-center text-center">
       <div class="mt-6"><span class="chip-m">YOUR TYPE</span></div>
-      <div id="axLetter" class="mt-5 text-[78px] font-black leading-none gtext">A</div>
+      <div id="axLetter" class="mt-5 text-[78px] font-extrabold leading-none gtext">A</div>
       <h1 id="axName" class="mt-2 text-[22px] font-extrabold">—</h1>
       <p id="axDesc" class="text-[14px] text-[var(--muted)] mt-3 leading-relaxed px-3">—</p>
       <div class="card-accent p-4 mt-6 w-full text-left">
-        <div class="text-[14px] tracking-wide font-bold" style="color:var(--violet-soft);">현장 안내</div>
+        <div class="text-[14px] tracking-wide font-bold" style="color:var(--violet-soft);">🎁 브로셔 수령 안내</div>
         <div id="axDesk" class="mt-2 text-[15px] font-bold leading-snug">—</div>
         <div id="axSub" class="text-[14px] text-[var(--muted)] mt-2">—</div>
       </div>
-      <button id="axDone" class="v-btn mt-auto">메뉴로 돌아가기 →</button>
+      <button id="axDone" class="v-btn mt-auto">미션 2 · 부스 도장깨기 하러가기 →</button>
     </div>
 
     <!-- 6) 퀴즈 입장 (부 선택 + 닉네임) -->
@@ -220,11 +251,11 @@
         <span class="chip-m">QUIZ ENTRY</span>
         <button class="text-[13px] font-bold" style="color:var(--violet-soft);" data-go="myprize">🎁 내 순위·경품 →</button>
       </div>
-      <h1 class="mt-3 text-[22px] font-extrabold leading-tight">순위판에 표시될<br/><span class="gtext">닉네임을 정해주세요.</span></h1>
+      <h1 class="mt-3 text-[28px] font-extrabold leading-tight">순위판에 표시될<br/><span class="gtext">닉네임을 정해주세요.</span></h1>
       <p class="text-[14px] text-[var(--muted)] mt-2">순위판엔 닉네임 + 회사명이 함께 표시돼요</p>
 
       <div class="mt-5">
-        <div class="text-[14px] font-bold tracking-wide" style="color:var(--violet-soft);">참여 세션 (명단 기준 자동 배정)</div>
+        <div class="text-[14px] font-bold tracking-wide" style="color:var(--violet-soft);">참여 세션</div>
         <div id="qPartLabel" class="mt-2 card p-3 text-[15px] font-bold">— 부</div>
       </div>
 
@@ -239,7 +270,8 @@
 
     <!-- 7) 퀴즈 대기 -->
     <div id="quizwait" class="screen">
-      <div class="flex items-center justify-end mt-2">
+      <div class="flex items-center justify-between mt-2">
+        <span id="qwNick" class="text-[16px] font-extrabold" style="color:var(--violet-soft);">🏷️ —</span>
         <button class="text-[13px] font-bold" style="color:var(--violet-soft);" data-go="myprize">🎁 내 순위·경품 →</button>
       </div>
       <div class="flex-1 flex flex-col items-center justify-center text-center">
@@ -250,29 +282,31 @@
           <span class="ring"></span><span class="ring r2"></span><span class="ring r3"></span>
           <span class="dot"></span>
         </div>
-        <h1 class="mt-10 text-[32px] font-extrabold leading-tight">곧 퀴즈가<br/><span class="gtext">시작됩니다.</span></h1>
+        <h1 id="qwTitle" class="mt-10 text-[27px] font-extrabold leading-tight">곧 <span class="gtext">퀴즈가 시작됩니다!</span></h1>
         <p id="qwMsg" class="mt-4 text-[16px] text-[var(--muted)] leading-relaxed px-4">관리자가 시작을 누르면 한 문제씩 나타나요.</p>
         <div id="qwInfo" class="mt-5 chip-m">1부 · 대기 중</div>
-        <div id="qwNick" class="mt-3 text-[15px] font-bold" style="color:var(--violet-soft);">🏷️ —</div>
       </div>
       <button id="quizWaitBack" class="v-btn-ghost">← 홈으로</button>
     </div>
 
     <!-- 8) 퀴즈 문제 (Kahoot형 2×2) -->
     <div id="quizQ" class="screen">
-      <div class="flex items-center justify-between text-[14px] mt-1">
+      <div class="flex items-center justify-between mt-2">
+        <span id="qNick" class="text-[16px] font-extrabold" style="color:var(--violet-soft);">🏷️ —</span>
+        <button id="qPrizeLink" class="text-[13px] font-bold" style="color:var(--violet-soft);" data-go="myprize">🎁 내 순위·경품 →</button>
+      </div>
+      <div class="flex items-center justify-between text-[14px] mt-3">
         <span id="qSpeaker" class="font-semibold text-[var(--muted)]">1부 · Q1</span>
         <span id="qCount" class="font-extrabold" style="color:#FF4D8D;">1 / 8</span>
       </div>
-      <div id="qNick" class="text-[14px] mt-1 font-bold" style="color:var(--violet-soft);">🏷️ —</div>
       <h1 id="qQuestion" class="mt-3 text-[20px] font-extrabold leading-snug"></h1>
-      <div id="qImageWrap" class="mt-3 rounded-2xl overflow-hidden" style="height:220px; border:1px solid var(--line); display:none;">
+      <div id="qImageWrap" class="mt-3 rounded-2xl overflow-hidden" style="height:200px; border:1px solid var(--line); display:none;">
         <img id="qImage" style="width:100%; height:100%; object-fit:cover;" alt="" />
       </div>
-      <div id="qTiles" class="mt-4 grid grid-cols-2 gap-3"></div>
+      <div id="qLockMsg" class="mt-3 text-center text-[13px] font-bold rounded-xl py-2" style="color:var(--violet-soft); background:rgba(139,43,255,.1); border:1px solid rgba(139,43,255,.3);">👀 사회자 신호에 맞춰 정답이 열려요 · 잠시만 기다려주세요</div>
+      <div id="qTiles" class="mt-3 grid grid-cols-2 gap-3"></div>
       <div class="mt-auto pt-4 text-center">
         <div id="qTimer" class="font-extrabold leading-none" style="font-size:36px; color:#FFFFFF;">⏱ 30</div>
-        <div class="text-[14px] text-[var(--muted-2)] mt-2">정답자 중 빠른 순서로 점수 · 종합순위 반영</div>
       </div>
     </div>
 
@@ -281,19 +315,16 @@
       <div class="mt-7">
         <div id="qrIcon" class="w-20 h-20 rounded-full mx-auto flex items-center justify-center text-[34px]"
              style="background:linear-gradient(135deg,#8B2BFF,#6A3CFF); color:#fff; box-shadow:0 0 40px -6px rgba(139,43,255,.6);">✓</div>
-        <h1 id="qrTitle" class="mt-4 text-[28px] font-extrabold gtext">정답!</h1>
-        <p id="qrSub" class="text-[14px] text-[var(--muted)] mt-1">빠른 정답 처리됨</p>
-        <p id="qrNick" class="text-[14px] mt-1 font-bold" style="color:var(--violet-soft);">🏷️ —</p>
+        <h1 id="qrTitle" class="mt-4 text-[40px] font-extrabold gtext leading-none">정답!</h1>
+        <p id="qrNick" class="text-[14px] mt-3 font-bold" style="color:var(--violet-soft);">🏷️ —</p>
       </div>
       <div class="card-accent p-4 mt-5 text-center">
         <div class="text-[14px] tracking-wide font-bold" style="color:var(--violet-soft);">현재 종합 순위 (잠정)</div>
-        <div id="qrRank" class="mt-1 text-[30px] font-black gtext">—</div>
+        <div id="qrRank" class="mt-1 text-[30px] font-extrabold gtext">—</div>
         <div id="qrPoints" class="text-[14px] text-[var(--muted)] mt-1">—</div>
       </div>
-      <div class="rounded-xl p-3 mt-3 text-left" style="background:rgba(255,77,77,.1); border:1px solid rgba(255,77,77,.25);">
-        <div class="text-[14px] text-[var(--ink)] leading-relaxed">- 경품은 모든 문제 종료 후 종합 순위로 결정돼요!<br/>- 행사 종료 후 퇴장 시 웰컴부스에서 선물 수령이 가능해요!<br/><b style="color:#FFD27A;">- 단, 설문 완료가 되어야 경품을 받을 수 있어요!</b></div>
-      </div>
-      <button id="qrNext" class="v-btn mt-auto">다시 대기하기</button>
+      <div class="mt-4 text-center text-[16px] font-bold" style="color:#FFD27A;">🌰 끝까지 남으시면 호두과자를 받을 수 있어요!</div>
+      <button id="qrNext" class="v-btn mt-auto">다음 퀴즈 대기하기</button>
     </div>
 
     <!-- 10) 내 경품 · 순위 -->
@@ -311,24 +342,25 @@
       <button id="mpBack" class="v-btn-ghost mt-3">← 홈으로</button>
     </div>
 
-    <!-- 11) 부스 스탬프 -->
+    <!-- 11) 부스 도장깨기 -->
     <div id="booth" class="screen">
-      <div class="text-[14px] font-bold" style="color:var(--violet-soft);">부스 스탬프</div>
+      <div class="text-[14px] font-bold" style="color:var(--violet-soft);">🎪 부스 도장깨기</div>
       <div class="flex-1 flex flex-col items-center justify-center text-center">
-        <div id="boothStamp" class="w-32 h-32 rounded-full flex items-center justify-center text-[48px]"
-             style="background:linear-gradient(135deg,rgba(20,184,166,.25),rgba(27,21,64,.6)); border:1px solid var(--line);">🎪</div>
-        <h1 id="boothTitle" class="mt-5 text-[22px] font-extrabold">AX 체험 부스</h1>
+        <div class="w-full rounded-2xl overflow-hidden" style="border:1px solid var(--line);">
+          <img src="booth.jpg?v=1" alt="플로우 AX 체험 부스" style="width:100%; height:170px; object-fit:cover; display:block;" />
+        </div>
+        <h1 id="boothTitle" class="mt-4 text-[22px] font-extrabold">플로우 체험 부스</h1>
 
         <div id="boothForm" class="w-full mt-4">
-          <p class="text-[14px] text-[var(--muted)] leading-relaxed">체험 및 상담을 받으셨다면<br/>직원에게 말씀해주세요!</p>
-          <input id="boothPin" class="inp mt-3 text-center tracking-[0.4em] text-[20px] font-bold" inputmode="numeric" maxlength="6" placeholder="PIN" />
+          <p class="text-[19px] font-extrabold leading-snug">플로우 부스에서 체험하고<br/><span class="gtext">직원에게 비밀코드를 받으세요!</span></p>
+          <input id="boothPin" class="inp mt-4 text-center tracking-[0.4em] text-[20px] font-bold" inputmode="numeric" maxlength="6" placeholder="비밀코드" />
           <div id="boothMsg" class="text-[14px] mt-2" style="display:none;"></div>
           <button id="boothBtn" class="v-btn mt-3">인증하기</button>
         </div>
 
         <div id="boothDone" style="display:none;" class="mt-4">
-          <div class="text-[20px] font-extrabold gtext">✓ 인증 완료</div>
-          <p class="text-[14px] text-[var(--muted)] mt-2">부스 방문 스탬프가 적립되었어요. 감사합니다!</p>
+          <div class="text-[22px] font-extrabold gtext">✓ 도장 획득 완료!</div>
+          <p class="text-[14px] text-[var(--muted)] mt-2">부스 방문 도장이 적립되었어요. 감사합니다!</p>
         </div>
       </div>
       <button id="boothBack" class="v-btn-ghost">← 홈으로</button>
@@ -338,13 +370,46 @@
 </div>
 <div id="toast" class="toast"></div>
 
+<!-- 타임테이블 바텀시트 -->
+<div id="ttSheet" class="tt-backdrop">
+  <div class="tt-panel">
+    <div class="tt-handle"></div>
+    <div class="flex items-center justify-between">
+      <h2 class="text-[20px] font-extrabold">🗓️ AX Festa 타임테이블</h2>
+      <button id="ttClose" class="text-[14px] text-[var(--muted)] underline">닫기</button>
+    </div>
+    <p class="text-[14px] text-[var(--muted)] mt-1">2026. 6. 25 (목) · 여의도 · 그랜드볼룸</p>
+
+    <div class="card p-4 mt-4">
+      <div class="flex items-center gap-2"><span class="chip-m">1부</span><span class="text-[15px] font-bold">오전 9시 ~</span></div>
+      <div class="text-[14px] text-[var(--ink-2)] mt-2 leading-relaxed">
+        김대식 교수 · 이학준 대표 · 장아람 실장 · 허경무 책임 · 서성진 과장 · 신승용 팀장 · 김동현 기술원 · 송길영 작가
+      </div>
+    </div>
+    <div class="card p-4 mt-3">
+      <div class="flex items-center gap-2"><span class="chip-m">2부</span><span class="text-[15px] font-bold">오후 2시 ~</span></div>
+      <div class="text-[14px] text-[var(--ink-2)] mt-2 leading-relaxed">
+        송길영 작가 · 이학준 대표 · 조코딩 · 빌더조쉬 · 손재권 대표 · 최청아 대표 · 송영범 대표 · 이세원 변호사 · 정주헌 대표 · 정혁신 대표 · 장아람 실장
+      </div>
+    </div>
+
+    <p class="text-[13px] text-[var(--muted-2)] mt-3 text-center">정확한 시간·세부 순서는 공식 페이지에서 확인하세요.</p>
+    <a href="https://flow.team/ko/ax-festa#timetable" target="_blank" rel="noopener" class="v-btn-ghost mt-3 text-center" style="display:block;">
+      공식 타임테이블 전체보기 ↗
+    </a>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/config.js?v=3"></script>
 <script src="js/supabase.js?v=3"></script>
 <script>
 (function(){
   var screens = ['loading','login','blocked','home','survey','axresult','quizentry','quizwait','quizQ','quizresult','myprize','booth'];
-  function show(id){ screens.forEach(function(s){ document.getElementById(s).classList.toggle('on', s===id); }); }
+  function show(id){
+    screens.forEach(function(s){ document.getElementById(s).classList.toggle('on', s===id); });
+    var lb=document.querySelector('.ledbar'); if(lb) lb.style.display = (id==='quizQ') ? 'none' : '';  // 문제 풀 땐 집중 위해 숨김
+  }
   var el = function(id){ return document.getElementById(id); };
   function lmsg(text, ok){ var e=el('loginMsg'); e.textContent=text; e.style.color = ok?'#6EE7A0':'#FF6B6B'; e.style.display='block'; }
   var toastT;
@@ -377,7 +442,7 @@
       { name:'email',                    value: p.email || '' },
       { name:'company',                  value: p.company || '' },
       { name:'numemployees',             value: '' },                                  // 회사인원: 없어도 제출
-      { name:'competitive_product',      value: a.competitive_product || '' },
+      { name:'industry_korean',          value: a.industry_korean || '' },
       { name:'service_interest_radio',   value: a.service_interest_radio || '' },
       { name:'service_type_radio',       value: a.service_type_radio || '' },
       { name:'r_u_plan_flow',            value: a.r_u_plan_flow || '' },
@@ -403,7 +468,8 @@
     profile = p;
     el('homeNick').textContent    = getNick() || p.name || p.email.split('@')[0];
     el('surveyState').textContent = p.survey_done
-      ? '✓ 설문 완료 — 경품 수령 자격 있어요!' : '미션을 완료하고 선물을 받아가세요!';
+      ? '✓ 설문 완료! 발표 퀴즈쇼까지 끝까지 참여해야 경품을 받을 수 있어요'
+      : '미션을 완료하고 선물을 받아가세요!';
   }
   async function init(){
     var saved = getEmail();
@@ -417,7 +483,7 @@
     if(nick.length<2 || nick.length>10){ lmsg('닉네임은 2~10자로 입력하세요.'); return; }
     var btn=this; btn.disabled=true; btn.innerHTML='<span class="spin"></span> 확인 중…';
     var p = await check(email);
-    btn.disabled=false; btn.textContent='🎁 참여하고 선물받기';
+    btn.disabled=false; btn.textContent='🎁 참가하고 선물받기';
     if(p === undefined) return;
     if(!p){ show('blocked'); return; }
     saveEmail(email); saveNick(nick); fillHome(p); show('home');
@@ -430,40 +496,61 @@
   // ───────────── 설문 ─────────────
   // 키 = HubSpot 인터널네임, 값 = HubSpot 옵션값과 동일 (제출 시 그대로 전송)
   var SURVEY = [
-    { key:'competitive_product', title:'현재 사내에서 사용 중인<br/>협업·소통 도구는?', multi:false, hint:'택 1', grid:true,
-      options:['그룹웨어','카카오톡','메일','슬랙','노션','잔디','팀즈','구글 워크스페이스','두레이','아사나','네이트온','스윗','지라','컨플루언스','먼데이닷컴','기타'] },
+    { key:'industry_korean', title:'먼저, 어떤 업종에<br/>종사하고 계신가요?', multi:false, hint:'택 1', grid:true,
+      options:[
+        {label:'제조업', value:'제조업'},
+        {label:'정보통신(IT)', value:'정보통신업(IT)'},
+        {label:'F&B/프랜차이즈', value:'F&B/ 프랜차이즈'},
+        {label:'도/소매 유통', value:'도/소매 유통 판매'},
+        {label:'엔터/여행/예술', value:'엔터테인먼트/ 여행/ 예술'},
+        {label:'서비스', value:'서비스'},
+        {label:'공공', value:'공공 행정'},
+        {label:'건설/기간산업', value:'건설 및 기간 산업'},
+        {label:'세무/법무/노무', value:'세무/법무/노무'},
+        {label:'운수/물류', value:'운수 및 물류'},
+        {label:'의료/복지', value:'의료보건/ 사회복지'},
+        {label:'금융', value:'금융/ 보험/ 부동산'},
+        {label:'협회/단체', value:'협회 및 단체'},
+        {label:'교육/연구', value:'교육/ 연구'},
+        {label:'1차 산업', value:'1차 산업(농.임.수산업)'},
+        {label:'기타', value:'기타'}
+      ] },
     { key:'service_interest_radio', title:'관심 있는<br/>플로우 상품군은?', multi:false, hint:'택 1',
-      options:['플로우+AI','플로우','플로우+위키'] },
+      options:[
+        {label:'플로우 (워크스페이스OS — 업무관리·메신저)', value:'플로우'},
+        {label:'플로우+AI (AI가 결합된 워크스페이스OS)', value:'플로우+AI'},
+        {label:'플로우+위키 (사내 지식 관리 기능 포함)', value:'플로우+위키'}
+      ] },
     { key:'service_type_radio', title:'선호하는<br/>도입 형태는?', multi:false, hint:'택 1',
-      options:[{label:'클라우드(SaaS) 도입', value:'클라우드 도입문의'},{label:'구축형(온프레미스) 도입', value:'구축상품 도입문의'}] },
+      options:[
+        {label:'SaaS 구독형 (클라우드 기반, 빠른 도입과 월 구독)', value:'클라우드 도입문의'},
+        {label:'Ent 구축형 (자사망 설치형, 보안·커스터마이징 우선)', value:'구축상품 도입문의'}
+      ] },
     { key:'r_u_plan_flow', title:'향후 플로우<br/>도입 계획은?', multi:false, hint:'택 1',
-      options:['현재 검토 중','도움이 된다면 긍정적으로 검토 예정','이미 도입해서 이용 중','아직 계획 없음'] },
+      options:[
+        {label:'적극 도입 검토 (6개월 내)', value:'현재 검토 중'},
+        {label:'도움된다면 긍정적 검토예정 (1년 내)', value:'도움이 된다면 긍정적으로 검토 예정'},
+        {label:'이미 플로우 도입완료 (기존고객)', value:'이미 도입해서 이용 중'},
+        {label:'아직 계획 없음', value:'아직 계획 없음'}
+      ] },
     { key:'implementation_objective', title:'도입하신다면<br/>주요 사유는?', multi:true, hint:'복수 선택 가능',
-      options:['사내 메신저/커뮤니케이션 통합 (카카오톡·라인 등 대체)','프로젝트·업무 관리 고도화','보고·결재 프로세스 디지털화','재택·하이브리드 근무 환경 구축','외부 협업 (고객사·파트너사 포함)','업무 데이터·지식 중앙화','IT 보안·망분리 환경 내 협업','그룹웨어/ERP 연동','비용 절감 (현재 사용 중인 툴 교체)','기타'] },
-    { key:'r_u_consult_flow', title:'플로우 컨설턴트의<br/>1:1 상담이 필요하신가요?', multi:false, hint:'택 1',
+      options:['사내 메신저/커뮤니케이션 통합 (카카오톡·라인 등 대체)','프로젝트·업무 관리 고도화','외부 협업 (고객사·파트너사 포함)','업무 데이터·지식 중앙화','IT 보안·망분리 환경 내 협업','그룹웨어/ERP 연동','비용 절감 (현재 사용 중인 툴 교체)','기타'] },
+    { key:'r_u_consult_flow', title:'플로우 AX 컨설턴트의<br/>1:1 상담이 필요하신가요?', multi:false, hint:'택 1',
       options:['네, 전문가와 상담 받고 싶어요!','아니요, 괜찮습니다.'] }
   ];
   var TYPE = {
-    A:{ name:'의사결정 단계 리더', desc:'조직의 AX 전환을 가까운 시일 내 결정하시는 단계입니다.',
-        desk:'입구 우측 <b class="gtext">바이올렛 데스크</b>에서 "A 타입 브로셔"를 수령하세요.', sub:'AI 도입 ROI · 의사결정 가이드' },
-    B:{ name:'실무 효율 혁신가', desc:'현업의 업무 효율을 AI로 끌어올리는 데 관심이 크신 단계입니다.',
-        desk:'<b class="gtext">바이올렛 데스크</b>에서 "B 타입 브로셔"를 수령하세요.', sub:'워크플로우·AI 활용 사례집' },
-    C:{ name:'탐색·인지 단계', desc:'AX 트렌드를 살펴보며 가능성을 탐색하시는 단계입니다.',
-        desk:'<b class="gtext">바이올렛 데스크</b>에서 "C 타입 브로셔"를 수령하세요.', sub:'플로우 소개·AX 트렌드 리포트' }
+    A:{ name:'빠른 실행형 (SaaS)', desc:'클라우드 기반으로 빠르게 도입해 바로 업무 효율을 끌어올리는 타입이에요.',
+        brochure:'A 타입 (SaaS·클라우드) 브로셔' },
+    B:{ name:'구축·보안 중시형 (Enterprise)', desc:'자사망 구축형으로 보안과 맞춤 구성을 우선하는 타입이에요.',
+        brochure:'B 타입 (구축·엔터프라이즈) 브로셔' },
+    C:{ name:'공공·행정형', desc:'공공·행정 환경에 최적화된 도입을 살펴보시는 타입이에요.',
+        brochure:'C 타입 (공공·행정) 브로셔' }
   };
+  // 브로셔 분기: 공공 업종 → C / 구축(Ent) → B / 그 외(SaaS) → A
   function classify(a){
-    var plan=a.r_u_plan_flow, consult=a.r_u_consult_flow,
-        interest=a.service_interest_radio, type=a.service_type_radio;
-    // A: 의사결정 단계 리더 — 적극적 도입 의지
-    if(plan==='현재 검토 중') return 'A';
-    if(consult==='네, 전문가와 상담 받고 싶어요!') return 'A';
-    // B: 실무 효율 혁신가 — 이미 사용 / 긍정 검토 / AI·위키·구축 관심
-    if(plan==='이미 도입해서 이용 중') return 'B';
-    if(plan==='도움이 된다면 긍정적으로 검토 예정') return 'B';
-    if(interest==='플로우+AI' || interest==='플로우+위키') return 'B';
-    if(type==='구축상품 도입문의') return 'B';
-    // C: 탐색·인지 단계 — 그 외 (대개 '아직 계획 없음')
-    return 'C';
+    if(a.industry_korean === '공공 행정') return 'C';
+    if(a.service_type_radio === '구축상품 도입문의') return 'B';
+    return 'A';
   }
   var svIdx=0, svAns={};
   function startSurvey(){ svIdx=0; svAns={}; renderSurvey(); show('survey'); }
@@ -481,7 +568,9 @@
       var lab = (o && typeof o==='object') ? o.label : o; // 표시 라벨
       var d=document.createElement('div');
       var seld=q.multi?(Array.isArray(cur)&&cur.indexOf(t)>=0):(cur===t);
-      d.className=(q.grid?'optmini':'opt')+(seld?' sel':''); d.textContent=lab;
+      d.className=(q.grid?'optmini':'opt')+(seld?' sel':'');
+      if(q.multi){ d.innerHTML='<span class="cbx'+(seld?' on':'')+'"></span><span class="flex-1">'+lab+'</span>'; }
+      else { d.textContent=lab; }
       d.addEventListener('click', function(){
         if(q.multi){ var arr=Array.isArray(svAns[q.key])?svAns[q.key].slice():[]; var i=arr.indexOf(t); if(i>=0)arr.splice(i,1); else arr.push(t); svAns[q.key]=arr; }
         else { svAns[q.key]=t; }
@@ -490,33 +579,35 @@
       box.appendChild(d);
     });
     var has=q.multi?(Array.isArray(cur)&&cur.length>0):!!cur;
-    var nb=el('svNext'); nb.disabled=!has; nb.textContent=(svIdx===SURVEY.length-1)?'결과 보기':'다음';
+    var nb=el('svNext'); nb.disabled=!has; nb.textContent=(svIdx===SURVEY.length-1)?'제출하기':'다음';
   }
   el('svNext').addEventListener('click', async function(){
     if(svIdx<SURVEY.length-1){ svIdx++; renderSurvey(); return; }
     var type=classify(svAns);
     var btn=this; btn.disabled=true; btn.innerHTML='<span class="spin"></span> 저장 중…';
     var r=await db.rpc('submit_survey',{p_email:getEmail(),p_answers:svAns,p_ax_type:type});
-    btn.disabled=false; btn.textContent='결과 보기';
+    btn.disabled=false; btn.textContent='제출하기';
     if(r.error){ toast('저장 오류: '+r.error.message); return; }
     if(profile) profile.survey_done=true;
     hubspotSubmit({ email:getEmail(), name:(profile&&profile.name)||'', company:(profile&&profile.company)||'', ax_type:type, answers:svAns });
-    el('surveyState').textContent='✓ 설문 완료 — 경품 수령 자격 있음';
+    el('surveyState').textContent='✓ 설문 완료! 발표 퀴즈쇼까지 끝까지 참여해야 경품을 받을 수 있어요';
     var t=TYPE[type];
     el('axLetter').textContent=type; el('axName').textContent=t.name; el('axDesc').textContent=t.desc;
-    el('axDesk').innerHTML=t.desk; el('axSub').textContent=t.sub;
+    el('axDesk').innerHTML='웰컴존에서 <b class="gtext">'+t.brochure+'</b>를 받아보세요.';
+    el('axSub').textContent='설문을 완료한 분께 드려요.';
     show('axresult');
   });
   el('svBack').addEventListener('click', function(){ show('home'); });
-  el('axDone').addEventListener('click', function(){ show('home'); });
+  el('axDone').addEventListener('click', function(){ startBooth(); });
 
   // ───────────── 퀴즈 ─────────────
   var TILE_COLORS = ['#E84C7A','#3B82F6','#8B5CF6','#14B8A6'];
-  var quiz = { part:1, nick:'', answered:{}, currentId:null, pollTimer:null, tickTimer:null };
-  var PART_TOTAL = { 1:8, 2:11 };
+  var quiz = { part:1, nick:'', done:{}, correct:{}, currentId:null, currentStatus:null, pollTimer:null, tickTimer:null };
+  var PART_TOTAL = { 1:17, 2:23 };  // 오프닝 연습 1 + 연사당 2문제
 
   function startQuizFlow(){
     quiz.part = (profile && profile.part) ? profile.part : 1;  // 명단(시트)에서 배정된 부
+    if(quiz.seenAny===undefined) quiz.seenAny=false;  // 첫 입장이면 시작시각 안내 문구
     quiz.nick = quiz.nick || getNick();  // 첫 화면에서 정한 닉네임 재사용
     el('qPartLabel').textContent = quiz.part + '부 · 총 ' + PART_TOTAL[quiz.part] + '문제';
     el('nickInput').value=quiz.nick||''; el('nickMsg').style.display='none'; show('quizentry');
@@ -539,9 +630,15 @@
   });
   el('quizEntryBack').addEventListener('click', function(){ show('home'); });
   el('quizWaitBack').addEventListener('click', function(){ stopPolling(); show('home'); });
-  el('qrNext').addEventListener('click', function(){ goWaiting('정답을 제출했어요. 다음 문제를 기다리는 중…'); });
+  el('qrNext').addEventListener('click', function(){ goWaiting('다음 문제를 기다리는 중…'); });
 
   function goWaiting(msg){
+    if(quiz.seenAny){
+      el('qwTitle').innerHTML = '다음 문제를<br/><span class="gtext">준비 중이에요</span>';
+    } else {
+      var time = quiz.part===2 ? '오후 2시' : '오전 9시';
+      el('qwTitle').innerHTML = time + '에 그랜드볼룸에서<br/><span class="gtext">퀴즈가 시작됩니다!</span>';
+    }
     el('qwMsg').textContent = msg || '관리자가 시작을 누르면 한 문제씩 나타나요.';
     el('qwInfo').textContent = quiz.part + '부 · 대기 중';
     el('qwNick').textContent = '🏷️ ' + (quiz.nick || '-');
@@ -550,38 +647,58 @@
   function startPolling(){ stopPolling(); pollQuiz(); quiz.pollTimer=setInterval(pollQuiz, POLL); }
   function stopPolling(){ if(quiz.pollTimer){ clearInterval(quiz.pollTimer); quiz.pollTimer=null; } if(quiz.tickTimer){ clearInterval(quiz.tickTimer); quiz.tickTimer=null; } }
 
+  // preview = 문제 공개·응답 잠금 / live = 정답 입력·타이머. 폴링은 계속 돌며 상태 전환만 감지.
   async function pollQuiz(){
     var onWait=el('quizwait').classList.contains('on');
     var onQ=el('quizQ').classList.contains('on');
-    if(!onWait && !onQ) return;
-    var r=await db.from('public_live_quiz').select('*').eq('part', quiz.part).limit(1);
+    var onRes=el('quizresult').classList.contains('on');
+    if(!onWait && !onQ && !onRes) return;
+    var r=await db.from('public_live_quiz').select('*').eq('part', quiz.part);
     if(r.error){ return; }
-    var live=r.data && r.data[0];
-    if(!live){ if(onQ){ quiz.currentId=null; goWaiting('문항이 종료됐어요. 다음 문제를 기다리는 중…'); } return; }
-    if(quiz.answered[live.id]){ if(onQ){ quiz.currentId=null; goWaiting('정답을 제출했어요. 다음 문제를 기다리는 중…'); } return; }
-    if(quiz.currentId !== live.id || onWait){ quiz.currentId=live.id; renderQuestion(live); show('quizQ'); }
+    var rows=r.data||[];
+    var active = rows.filter(function(x){return x.status==='live';})[0]
+              || rows.filter(function(x){return x.status==='preview';})[0];
+    if(!active){
+      quiz.currentId=null; quiz.currentStatus=null;
+      if(onQ){ goWaiting('문항이 종료됐어요. 다음 문제를 기다리는 중…'); }  // 결과 화면은 그대로 유지
+      return;
+    }
+    if(quiz.done[active.id]){
+      if(!onRes && !onWait){ goWaiting(quiz.correct[active.id] ? '정답을 맞혔어요! 다음 문제 대기 중…' : '다음 문제를 기다리는 중…'); }
+      return;  // 이미 푼 문제 — 결과/대기 유지
+    }
+    // 아직 안 푼 활성 문제 → 문항·상태가 바뀌었을 때만 새로 렌더(입력 중 방해 방지)
+    if(quiz.currentId!==active.id || quiz.currentStatus!==active.status || onWait || onRes){
+      quiz.currentId=active.id; quiz.currentStatus=active.status;
+      renderQuestion(active); show('quizQ');
+    }
   }
 
   function renderQuestion(q){
+    var isLive = (q.status==='live');
+    quiz.seenAny = true;  // 한 번이라도 문제가 떴으면 대기화면 문구를 '다음 문제 준비 중'으로
+    el('qNick').textContent = '🏷️ ' + (quiz.nick || '-');
+    el('qPrizeLink').style.display = isLive ? 'none' : 'inline-block';  // 정답받기 중엔 이탈 방지 위해 숨김
     el('qSpeaker').textContent = quiz.part + '부 · Q' + q.order_no + (q.speaker ? ' · '+q.speaker : '');
     el('qCount').textContent = q.order_no + ' / ' + PART_TOTAL[quiz.part];
-    el('qNick').textContent = '🏷️ ' + (quiz.nick || '-');
     el('qQuestion').textContent = q.question;
-    // 이미지 (있을 때만 표시 · 없으면 영역 자체를 숨김)
     if(q.image_url){ el('qImage').src=q.image_url; el('qImageWrap').style.display='block'; }
     else { el('qImageWrap').style.display='none'; el('qImage').removeAttribute('src'); }
-    // 타일
+    el('qLockMsg').style.display = isLive ? 'none' : 'block';
     var tiles=el('qTiles'); tiles.innerHTML='';
     var opts = q.options || [];
     opts.forEach(function(text, i){
       var b=document.createElement('button');
-      b.className='tile'; b.style.background=TILE_COLORS[i%4];
+      b.className='tile'; b.style.background=TILE_COLORS[i%4]; b.disabled=!isLive;  // preview면 못 누름
       b.innerHTML='<span class="tnum">'+(i+1)+'</span><span class="text-[17px] font-bold text-white text-center leading-tight">'+escapeHtml(text)+'</span>';
       b.addEventListener('click', function(){ answer(i+1); });
       tiles.appendChild(b);
     });
-    // 타이머
-    startTick(q);
+    if(isLive){ el('qTimer').style.opacity='1'; startTick(q); }
+    else {
+      if(quiz.tickTimer){ clearInterval(quiz.tickTimer); quiz.tickTimer=null; }
+      el('qTimer').style.opacity='.4'; el('qTimer').textContent='⏱ '+(q.time_limit||30);
+    }
   }
   function startTick(q){
     if(quiz.tickTimer){ clearInterval(quiz.tickTimer); quiz.tickTimer=null; }
@@ -589,33 +706,48 @@
     var start = q.started_at ? new Date(q.started_at).getTime() : Date.now();
     function upd(){
       var left = Math.max(0, Math.ceil((start + limit*1000 - Date.now())/1000));
-      el('qTimer').textContent = '⏱ ' + left;
-      if(left<=0){ el('qTimer').textContent='⏱ 마감'; }
+      el('qTimer').textContent = left>0 ? '⏱ ' + left : '⏱ 마감';
+      if(left<=0){ clearInterval(quiz.tickTimer); quiz.tickTimer=null; onTimeUp(); }
     }
-    upd(); quiz.tickTimer=setInterval(upd, 500);
+    upd(); quiz.tickTimer=setInterval(upd, 300);
+  }
+  function onTimeUp(){
+    var qid=quiz.currentId; if(!qid || quiz.done[qid]) return;
+    el('qTiles').querySelectorAll('.tile').forEach(function(t){ t.disabled=true; });
+    quiz.done[qid]=true; quiz.correct[qid]=false;
+    showQuizResult(false, true);
   }
   async function answer(choice){
-    var qid=quiz.currentId; if(!qid) return;
-    stopPolling();  // 제출/결과 동안 폴링 정지 → 결과 화면이 대기로 안 튕김
+    var qid=quiz.currentId; if(!qid || quiz.currentStatus!=='live' || quiz.done[qid]) return;
     var tiles=el('qTiles').querySelectorAll('.tile');
     tiles.forEach(function(t){ t.disabled=true; });
     var r=await db.rpc('submit_answer', { p_email:getEmail(), p_quiz_id:qid, p_choice:choice });
     if(r.error){
+      var m=r.error.message||'';
+      if(m.indexOf('time_over')>=0){ toast('시간이 종료됐어요.'); onTimeUp(); return; }
       tiles.forEach(function(t){ t.disabled=false; });
-      var msg=(r.error.message||'').indexOf('not_live')>=0 ? '이미 마감된 문항이에요.' : '제출 오류: '+r.error.message;
-      toast(msg); startPolling(); return;
+      toast(m.indexOf('not_live')>=0 ? '아직 정답 입력 시간이 아니에요.' : '제출 오류: '+m);
+      return;
     }
-    quiz.answered[qid]=true;
-    var res = r.data && r.data[0]; var correct = res && res.is_correct;
-    showQuizResult(correct);
+    var res = r.data && r.data[0];
+    var correct = res && res.is_correct;
+    if(correct){
+      quiz.done[qid]=true; quiz.correct[qid]=true;
+      burstConfetti();
+      showQuizResult(true);
+    } else {
+      // 오답 → 결과로 안 넘기고 화면 흔들고 재도전 허용 (틀린 만큼 점수 차감)
+      shakeScreen();
+      var wa = res ? res.wrong_attempts : 0;
+      toast('❌ 오답! 다시 도전하세요' + (wa ? ' (오답 '+wa+'회 · 점수 차감)' : ''));
+      tiles.forEach(function(t){ t.disabled=false; });
+    }
   }
-  async function showQuizResult(correct){
-    stopPolling();  // 결과 화면 머무는 동안 폴링 정지
+  async function showQuizResult(correct, timeup){
     if(quiz.tickTimer){ clearInterval(quiz.tickTimer); quiz.tickTimer=null; }
     el('qrIcon').textContent = correct ? '✓' : '✕';
     el('qrIcon').style.background = correct ? 'linear-gradient(135deg,#8B2BFF,#6A3CFF)' : 'linear-gradient(135deg,#6E6796,#3a3360)';
-    el('qrTitle').textContent = correct ? '정답!' : '정답이 아니에요';
-    el('qrSub').textContent = correct ? '빠른 정답 처리됨 · 점수 적립' : '이번 문제는 점수가 없어요';
+    el('qrTitle').textContent = correct ? '정답!' : (timeup ? '시간 종료' : '정답이 아니에요');
     el('qrNick').textContent = '🏷️ ' + (quiz.nick || '-');
     el('qrRank').textContent='집계 중…'; el('qrPoints').textContent='';
     show('quizresult');
@@ -623,6 +755,23 @@
     var d = r.data && r.data[0];
     if(d){ el('qrRank').textContent = d.rank + '위'; el('qrPoints').textContent = '누적 ' + d.total_points + '점 · 정답 ' + d.correct_count + '개'; }
     else { el('qrRank').textContent='—'; el('qrPoints').textContent='아직 집계 없음'; }
+  }
+  function burstConfetti(){
+    var colors=['#E84C7A','#3B82F6','#8B5CF6','#14B8A6','#FFD27A','#E608FF','#ffffff'];
+    for(var i=0;i<46;i++){ (function(i){
+      var d=document.createElement('div'); d.className='confetti-piece';
+      d.style.left=(Math.random()*100)+'vw';
+      d.style.background=colors[i%colors.length];
+      d.style.animationDuration=(1.1+Math.random()*1.3)+'s';
+      d.style.animationDelay=(Math.random()*0.25)+'s';
+      document.body.appendChild(d);
+      setTimeout(function(){ d.remove(); }, 2900);
+    })(i); }
+  }
+  function shakeScreen(){
+    var p=document.querySelector('.phone'); if(!p) return;
+    p.classList.remove('shake'); void p.offsetWidth; p.classList.add('shake');
+    setTimeout(function(){ p.classList.remove('shake'); }, 650);
   }
   function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
@@ -668,7 +817,7 @@
     return '<div class="card p-4 mb-3">'
       + '<div class="flex items-center justify-between"><div class="text-[15px] font-bold">'+part+'부</div><div class="text-[14px]">'+survey+'</div></div>'
       + '<div class="mt-2 flex items-end justify-between">'
-      +   '<div><div class="text-[14px] text-[var(--muted)]">종합 순위</div><div class="text-[28px] font-black gtext">'+d.rank+'위</div></div>'
+      +   '<div><div class="text-[14px] text-[var(--muted)]">종합 순위</div><div class="text-[28px] font-extrabold gtext">'+d.rank+'위</div></div>'
       +   '<div class="text-right"><div class="text-[14px] text-[var(--muted)]">누적 점수</div><div class="text-[20px] font-bold">'+d.total_points+'점</div></div>'
       + '</div>' + prizeBlock + '</div>';
   }
@@ -676,33 +825,26 @@
   // ───────────── 부스 스탬프 ─────────────
   el('boothBack').addEventListener('click', function(){ show('home'); });
   function renderBooth(done){
-    if(done){
-      el('boothForm').style.display='none'; el('boothDone').style.display='block';
-      el('boothStamp').textContent='✓';
-      el('boothStamp').style.background='linear-gradient(135deg,#8B2BFF,#6A3CFF)';
-    } else {
-      el('boothForm').style.display='block'; el('boothDone').style.display='none';
-      el('boothStamp').textContent='🎪';
-      el('boothStamp').style.background='linear-gradient(135deg,rgba(20,184,166,.25),rgba(27,21,64,.6))';
-    }
+    if(done){ el('boothForm').style.display='none'; el('boothDone').style.display='block'; }
+    else { el('boothForm').style.display='block'; el('boothDone').style.display='none'; }
   }
   async function startBooth(){
     el('boothMsg').style.display='none'; el('boothPin').value='';
     show('booth');
     var r=await db.rpc('booth_status', { p_email:getEmail() });
     var d=r.data && r.data[0];
-    el('boothTitle').textContent = (d && d.title) ? d.title : 'AX 체험 부스';
+    el('boothTitle').textContent = '플로우 체험 부스';
     renderBooth(d && d.booth_done);
   }
   el('boothBtn').addEventListener('click', async function(){
     var pin=el('boothPin').value.trim(); var m=el('boothMsg');
-    if(!pin){ m.textContent='PIN을 입력하세요.'; m.style.color='#FF6B6B'; m.style.display='block'; return; }
+    if(!pin){ m.textContent='비밀코드를 입력하세요.'; m.style.color='#FF6B6B'; m.style.display='block'; return; }
     var btn=this; btn.disabled=true; btn.innerHTML='<span class="spin"></span> 확인 중…';
     var r=await db.rpc('booth_checkin', { p_email:getEmail(), p_pin:pin });
     btn.disabled=false; btn.textContent='인증하기';
     if(r.error){ m.textContent='오류: '+r.error.message; m.style.color='#FF6B6B'; m.style.display='block'; return; }
-    if(r.data==='ok'){ toast('부스 인증 완료! 🎪'); renderBooth(true); }
-    else { m.textContent='PIN이 올바르지 않아요.'; m.style.color='#FF6B6B'; m.style.display='block'; }
+    if(r.data==='ok'){ toast('부스 도장 획득! 🎪'); renderBooth(true); }
+    else { m.textContent='비밀코드가 올바르지 않아요.'; m.style.color='#FF6B6B'; m.style.display='block'; }
   });
 
   // ───────────── 홈 메뉴 ─────────────
@@ -715,6 +857,20 @@
       if(go==='booth'){ startBooth(); return; }
     });
   });
+
+  // LED 전광판 문구 (이어붙여 끊김 없이 흐르게)
+  (function(){
+    var MSG = '🎉 AX FESTA 2026 LIVE     ·     퀴즈 참가자 전원 호두과자 증정 🌰     ·     미션 3개 완료하고 선물 받아가세요 🎁     ·     설문 → 부스 도장깨기 → 발표 퀴즈 랭킹쇼     ·     ';
+    var t=el('ledtrack'); if(t) t.textContent = MSG + MSG;
+  })();
+  // 타임테이블 바텀시트
+  (function(){
+    var sheet=el('ttSheet'); if(!sheet) return;
+    function close(){ sheet.classList.remove('on'); }
+    var b=el('timetableBtn'); if(b) b.addEventListener('click', function(){ sheet.classList.add('on'); });
+    var c=el('ttClose'); if(c) c.addEventListener('click', close);
+    sheet.addEventListener('click', function(e){ if(e.target===sheet) close(); });
+  })();
 
   init();
 })();

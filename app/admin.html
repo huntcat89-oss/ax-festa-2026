@@ -348,14 +348,17 @@
   async function loadQuizzes(){
     var r=await rpc('admin_list_quizzes',{p_part:quizPart}); if(r.error){ toast(r.error.message); return; }
     quizCache=r.data||[];
-    var live=quizCache.filter(function(q){return q.status==='live';})[0];
+    var live=quizCache.filter(function(q){return q.status==='live'||q.status==='preview';})[0];
     el('quizRows').innerHTML = quizCache.map(function(q){
-      var st = q.status==='live'?'<span class="chip chip-red live-blink">● LIVE</span>'
+      var st = q.status==='live'?'<span class="chip chip-red live-blink">● 정답받기 LIVE</span>'
+             : q.status==='preview'?'<span class="chip">👁 문제 공개</span>'
              : q.status==='closed'?'<span class="chip chip-green">종료</span>'
-             : q.status==='ready'?'<span class="chip">대기</span>':'<span class="chip chip-gray">초안</span>';
+             : '<span class="chip chip-gray">초안</span>';
       var act = q.status==='live'
         ? '<button class="btn-red btn-live" data-stop="'+q.id+'">종료</button>'
-        : '<button class="btn-go" data-start="'+q.id+'">시작</button>';
+        : q.status==='preview'
+        ? '<button class="btn-go" data-golive="'+q.id+'">정답받기 시작</button> <button class="btn-ghost" style="padding:7px 10px" data-reset="'+q.id+'">되돌리기</button>'
+        : '<button class="btn-go" data-preview="'+q.id+'">문제 공개</button>';
       return '<tr><td><b>'+q.order_no+'</b></td>'
         +'<td><div class="font-semibold">'+esc(q.speaker||'')+'</div></td>'
         +'<td>'+st+'</td>'
@@ -364,13 +367,21 @@
         +' <button class="btn-red" style="padding:7px 10px" data-del="'+q.id+'">삭제</button></td></tr>';
     }).join('');
     bindQuizButtons();
-    if(live){ setMonitor(live, 'live'); }
+    if(live){ setMonitor(live, live.status); }
     else if(!(monitor && monitor.status==='closed')){ clearMonitor(); }
   }
   function bindQuizButtons(){
-    document.querySelectorAll('[data-start]').forEach(function(b){ b.addEventListener('click', async function(){
-      var r=await rpc('admin_set_quiz_status',{p_quiz_id:b.getAttribute('data-start'), p_status:'live'});
-      if(r.error){ toast(r.error.message); return; } toast('문항을 시작했어요.'); loadQuizzes();
+    document.querySelectorAll('[data-preview]').forEach(function(b){ b.addEventListener('click', async function(){
+      var r=await rpc('admin_set_quiz_status',{p_quiz_id:b.getAttribute('data-preview'), p_status:'preview'});
+      if(r.error){ toast(r.error.message); return; } toast('① 문제 공개 — 참가자 화면에 문제가 뜨고 응답은 잠겨요.'); loadQuizzes();
+    });});
+    document.querySelectorAll('[data-golive]').forEach(function(b){ b.addEventListener('click', async function(){
+      var r=await rpc('admin_set_quiz_status',{p_quiz_id:b.getAttribute('data-golive'), p_status:'live'});
+      if(r.error){ toast(r.error.message); return; } toast('② 정답받기 시작 — "지금 맞춰주세요!" 타이머가 돌아갑니다.'); loadQuizzes();
+    });});
+    document.querySelectorAll('[data-reset]').forEach(function(b){ b.addEventListener('click', async function(){
+      var r=await rpc('admin_set_quiz_status',{p_quiz_id:b.getAttribute('data-reset'), p_status:'ready'});
+      if(r.error){ toast(r.error.message); return; } toast('공개를 되돌렸어요.'); loadQuizzes();
     });});
     document.querySelectorAll('[data-stop]').forEach(function(b){ b.addEventListener('click', async function(){
       var id=b.getAttribute('data-stop');
@@ -390,7 +401,8 @@
   }
   function setMonitor(q, status){
     monitor = { q:q, status:status };
-    if(status==='live'){ el('liveTag').className='chip chip-red live-blink'; el('liveTag').textContent='● '+q.order_no+'번 LIVE'; }
+    if(status==='live'){ el('liveTag').className='chip chip-red live-blink'; el('liveTag').textContent='● '+q.order_no+'번 정답받기 LIVE'; }
+    else if(status==='preview'){ el('liveTag').className='chip'; el('liveTag').textContent='👁 '+q.order_no+'번 문제 공개 (응답 잠김)'; }
     else { el('liveTag').className='chip chip-green'; el('liveTag').textContent='■ '+q.order_no+'번 종료 · 정답 공개'; }
     renderLive();
     if(liveTimer){ clearInterval(liveTimer); liveTimer=null; }
@@ -399,7 +411,7 @@
   function clearMonitor(){
     monitor=null; if(liveTimer){ clearInterval(liveTimer); liveTimer=null; }
     el('liveTag').className='chip chip-gray'; el('liveTag').textContent='대기 중';
-    el('liveBox').innerHTML='진행 중인 문항이 없습니다. 왼쪽에서 [시작]을 누르세요.';
+    el('liveBox').innerHTML='진행 중인 문항이 없습니다. 왼쪽에서 [문제 공개] → [정답받기 시작] 순서로 누르세요.';
   }
   async function renderLive(){
     if(!monitor) return;
