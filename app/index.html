@@ -111,15 +111,13 @@
     font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:13px; letter-spacing:2px; font-weight:700;
     color:#FFB23E; text-shadow:0 0 6px rgba(255,178,62,.85);}
   @keyframes ledscroll{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
-  /* 타임테이블 바텀시트 — 폰 프레임 내부에서 아래에서 올라옴 */
-  .tt-backdrop{position:absolute; inset:0; background:rgba(0,0,0,.5); z-index:40; display:none;
-    align-items:flex-end; justify-content:center; border-radius:inherit;}
-  .tt-backdrop.on{display:flex;}
-  .tt-panel{width:100%; max-height:86%; overflow:auto; background:var(--surface);
-    border-radius:22px 22px 0 0; border:1px solid var(--line); border-bottom:0; padding:12px 20px 26px;
-    transform:translateY(100%); transition:transform .3s ease;}
-  .tt-backdrop.on .tt-panel{transform:translateY(0);}
-  .tt-handle{width:44px; height:5px; border-radius:999px; background:var(--line); margin:2px auto 14px;}
+  /* 타임테이블 인라인 토글(아코디언) — 페이지 안에서 아래로 펼쳐짐 */
+  #timetableBtn .arrow{transition:transform .25s ease;}
+  #timetableBtn.open .arrow{transform:rotate(180deg);}
+  .tt-collapse{display:grid; grid-template-rows:0fr; transition:grid-template-rows .3s ease;}
+  .tt-collapse.open{grid-template-rows:1fr;}
+  .tt-collapse>.tt-inner{overflow:hidden; min-height:0;}
+  .tt-collapse.open>.tt-inner{margin-top:12px;}
   .tt-row{display:flex; gap:11px; padding:9px 0; border-top:1px solid var(--line);}
   .tt-t{flex:0 0 44px; font-weight:800; color:var(--violet-soft); font-size:13px; padding-top:1px;}
   .tt-s{font-size:14px; color:var(--ink-2); line-height:1.45;}
@@ -224,9 +222,44 @@
         </button>
       </div>
 
-      <button id="timetableBtn" class="mission-btn mt-3 justify-center text-[15px] font-bold" style="gap:8px; min-height:64px;">
-        🗓️ 타임테이블 확인하기 <span class="text-[var(--muted-2)] text-[14px]">▾</span>
+      <button id="timetableBtn" class="mission-btn mt-3 justify-center text-[15px] font-bold" style="gap:8px; min-height:64px;" aria-expanded="false">
+        🗓️ 타임테이블 확인하기 <span class="arrow text-[var(--muted-2)] text-[14px]">▾</span>
       </button>
+
+      <!-- 타임테이블 (인라인 토글 — 위 버튼 누르면 아래로 펼쳐짐) -->
+      <div id="ttCollapse" class="tt-collapse">
+        <div class="tt-inner">
+          <p class="text-[14px] text-[var(--muted)]">2026. 6. 25 (목) · 여의도 · 그랜드볼룸</p>
+
+          <div class="card p-4 mt-3">
+            <div class="flex items-center gap-2 mb-1"><span class="chip-m">1부</span><span class="text-[14px] font-bold">09:00 ~ 12:30</span></div>
+            <div class="tt-row"><span class="tt-t">08:30</span><span class="tt-s">등록 · 웰컴 라운지</span></div>
+            <div class="tt-row"><span class="tt-t">09:00</span><span class="tt-s"><b>김대식 교수</b> (KAIST)<br/>AI 시대, 지속 성장할 기업인의 생존 전략</span></div>
+            <div class="tt-row"><span class="tt-t">09:30</span><span class="tt-s"><b>이학준 대표</b> (플로우)<br/>The Age of AX : 차세대 AI 협업 OS 로드맵</span></div>
+            <div class="tt-row"><span class="tt-t">10:00</span><span class="tt-s"><b>장아람 실장</b> (플로우)<br/>131개국으로 확장한 AX 콘텐츠 공장</span></div>
+            <div class="tt-row"><span class="tt-t">10:30</span><span class="tt-s"><b>산업별 AX 전략</b><br/>HS화성 허경무 · 한국가스공사 서성진 · 한국원자력연구원 김동현</span></div>
+            <div class="tt-row"><span class="tt-t">11:30</span><span class="tt-s"><b>신승용 팀장</b> (LG CNS)<br/>a:xink와 flow로 완성하는 실행 가능한 AX</span></div>
+            <div class="tt-row"><span class="tt-t">11:50</span><span class="tt-s"><b>송길영 작가</b><br/>시대예보 : 경량문명의 탄생</span></div>
+            <div class="tt-row"><span class="tt-t">12:20</span><span class="tt-s">🎁 행운권 추첨 · 경품</span></div>
+          </div>
+          <div class="card p-4 mt-3">
+            <div class="flex items-center gap-2 mb-1"><span class="chip-m">2부</span><span class="text-[14px] font-bold">14:00 ~ 18:00</span></div>
+            <div class="tt-row"><span class="tt-t">13:10</span><span class="tt-s">등록 · 웰컴 라운지</span></div>
+            <div class="tt-row"><span class="tt-t">14:00</span><span class="tt-s"><b>송길영 작가</b><br/>시대예보 : 경량문명의 탄생</span></div>
+            <div class="tt-row"><span class="tt-t">14:30</span><span class="tt-s"><b>이학준 대표</b> (플로우)<br/>The Age of AX</span></div>
+            <div class="tt-row"><span class="tt-t">15:00</span><span class="tt-s"><b>장아람 실장</b> (플로우)<br/>131개국 AX 콘텐츠 공장</span></div>
+            <div class="tt-row"><span class="tt-t">15:20</span><span class="tt-s"><b>최청아 대표</b><br/>'돈텐츠'로 90억 달성한 AX 스몰 비즈니스</span></div>
+            <div class="tt-row"><span class="tt-t">15:40</span><span class="tt-s"><b>스타트업·중소기업 AX 전략</b><br/>조코딩 · 빌더조쉬 · 손재권 · 송영범 · 이세원 등</span></div>
+            <div class="tt-row"><span class="tt-t">16:40</span><span class="tt-s"><b>전문가 패널</b> : AI 생존 전략<br/>정주헌 · 정혁신 등</span></div>
+            <div class="tt-row"><span class="tt-t">17:40</span><span class="tt-s">🎁 행운권 추첨 · 경품</span></div>
+          </div>
+
+          <p class="text-[13px] text-[var(--muted-2)] mt-3 text-center">시간·순서는 현장 사정에 따라 바뀔 수 있어요. 정확한 내용은 공식 페이지에서 확인하세요.</p>
+          <a href="https://flow.team/ko/ax-festa#timetable" target="_blank" rel="noopener" class="v-btn-ghost mt-3 text-center" style="display:block;">
+            공식 타임테이블 전체보기 ↗
+          </a>
+        </div>
+      </div>
 
     </div>
 
@@ -374,45 +407,6 @@
       <button id="boothBack" class="v-btn-ghost">← 홈으로</button>
     </div>
 
-    <!-- 타임테이블 바텀시트 (폰 내부에서 슬라이드업) -->
-    <div id="ttSheet" class="tt-backdrop">
-      <div class="tt-panel">
-        <div class="tt-handle"></div>
-        <div class="flex items-center justify-between">
-          <h2 class="text-[20px] font-extrabold">🗓️ AX Festa 타임테이블</h2>
-          <button id="ttClose" class="text-[14px] text-[var(--muted)] underline">닫기</button>
-        </div>
-        <p class="text-[14px] text-[var(--muted)] mt-1">2026. 6. 25 (목) · 여의도 · 그랜드볼룸</p>
-
-        <div class="card p-4 mt-4">
-          <div class="flex items-center gap-2 mb-1"><span class="chip-m">1부</span><span class="text-[14px] font-bold">09:00 ~ 12:30</span></div>
-          <div class="tt-row"><span class="tt-t">08:30</span><span class="tt-s">등록 · 웰컴 라운지</span></div>
-          <div class="tt-row"><span class="tt-t">09:00</span><span class="tt-s"><b>김대식 교수</b> (KAIST)<br/>AI 시대, 지속 성장할 기업인의 생존 전략</span></div>
-          <div class="tt-row"><span class="tt-t">09:30</span><span class="tt-s"><b>이학준 대표</b> (플로우)<br/>The Age of AX : 차세대 AI 협업 OS 로드맵</span></div>
-          <div class="tt-row"><span class="tt-t">10:00</span><span class="tt-s"><b>장아람 실장</b> (플로우)<br/>131개국으로 확장한 AX 콘텐츠 공장</span></div>
-          <div class="tt-row"><span class="tt-t">10:30</span><span class="tt-s"><b>산업별 AX 전략</b><br/>HS화성 허경무 · 한국가스공사 서성진 · 한국원자력연구원 김동현</span></div>
-          <div class="tt-row"><span class="tt-t">11:30</span><span class="tt-s"><b>신승용 팀장</b> (LG CNS)<br/>a:xink와 flow로 완성하는 실행 가능한 AX</span></div>
-          <div class="tt-row"><span class="tt-t">11:50</span><span class="tt-s"><b>송길영 작가</b><br/>시대예보 : 경량문명의 탄생</span></div>
-          <div class="tt-row"><span class="tt-t">12:20</span><span class="tt-s">🎁 행운권 추첨 · 경품</span></div>
-        </div>
-        <div class="card p-4 mt-3">
-          <div class="flex items-center gap-2 mb-1"><span class="chip-m">2부</span><span class="text-[14px] font-bold">14:00 ~ 18:00</span></div>
-          <div class="tt-row"><span class="tt-t">13:10</span><span class="tt-s">등록 · 웰컴 라운지</span></div>
-          <div class="tt-row"><span class="tt-t">14:00</span><span class="tt-s"><b>송길영 작가</b><br/>시대예보 : 경량문명의 탄생</span></div>
-          <div class="tt-row"><span class="tt-t">14:30</span><span class="tt-s"><b>이학준 대표</b> (플로우)<br/>The Age of AX</span></div>
-          <div class="tt-row"><span class="tt-t">15:00</span><span class="tt-s"><b>장아람 실장</b> (플로우)<br/>131개국 AX 콘텐츠 공장</span></div>
-          <div class="tt-row"><span class="tt-t">15:20</span><span class="tt-s"><b>최청아 대표</b><br/>'돈텐츠'로 90억 달성한 AX 스몰 비즈니스</span></div>
-          <div class="tt-row"><span class="tt-t">15:40</span><span class="tt-s"><b>스타트업·중소기업 AX 전략</b><br/>조코딩 · 빌더조쉬 · 손재권 · 송영범 · 이세원 등</span></div>
-          <div class="tt-row"><span class="tt-t">16:40</span><span class="tt-s"><b>전문가 패널</b> : AI 생존 전략<br/>정주헌 · 정혁신 등</span></div>
-          <div class="tt-row"><span class="tt-t">17:40</span><span class="tt-s">🎁 행운권 추첨 · 경품</span></div>
-        </div>
-
-        <p class="text-[13px] text-[var(--muted-2)] mt-3 text-center">시간·순서는 현장 사정에 따라 바뀔 수 있어요. 정확한 내용은 공식 페이지에서 확인하세요.</p>
-        <a href="https://flow.team/ko/ax-festa#timetable" target="_blank" rel="noopener" class="v-btn-ghost mt-3 text-center" style="display:block;">
-          공식 타임테이블 전체보기 ↗
-        </a>
-      </div>
-    </div>
 
   </div>
 </div>
@@ -896,13 +890,18 @@
     var MSG = '🎉 AX FESTA 2026 LIVE     ·     퀴즈 참가자 전원 호두과자 증정 🌰     ·     미션 3개 완료하고 선물 받아가세요 🎁     ·     설문 → 부스 도장깨기 → 발표 퀴즈 랭킹쇼     ·     ';
     var t=el('ledtrack'); if(t) t.textContent = MSG + MSG;
   })();
-  // 타임테이블 바텀시트
+  // 타임테이블 인라인 토글(아코디언)
   (function(){
-    var sheet=el('ttSheet'); if(!sheet) return;
-    function close(){ sheet.classList.remove('on'); }
-    var b=el('timetableBtn'); if(b) b.addEventListener('click', function(){ sheet.classList.add('on'); });
-    var c=el('ttClose'); if(c) c.addEventListener('click', close);
-    sheet.addEventListener('click', function(e){ if(e.target===sheet) close(); });
+    var b=el('timetableBtn'), c=el('ttCollapse'); if(!b||!c) return;
+    b.addEventListener('click', function(){
+      var open = c.classList.toggle('open');
+      b.classList.toggle('open', open);
+      b.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if(open){
+        // 펼친 뒤 보이도록 살짝 스크롤
+        setTimeout(function(){ b.scrollIntoView({behavior:'smooth', block:'nearest'}); }, 320);
+      }
+    });
   })();
 
   init();
